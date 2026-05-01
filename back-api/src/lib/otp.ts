@@ -1,0 +1,9 @@
+import { randomInt, createHash } from 'crypto'
+
+export function generateOtp(): string {
+  return randomInt(0, 1_000_000).toString().padStart(6, '0')
+}
+
+export function hashOtp(otp: string): string {
+  return createHash('sha256').update(otp).digest('hex')
+}

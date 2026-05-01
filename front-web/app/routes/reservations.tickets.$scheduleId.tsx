@@ -1,0 +1,145 @@
+import { useState, useEffect } from "react"
+import { useParams, useNavigate, Link } from "react-router"
+import { apiFetch, ApiError } from "~/lib/api"
+import { draft } from "~/lib/draft"
+import { Header } from "~/components/layout/Header"
+import { Button } from "~/components/ui/Button"
+import {
+  TICKET_TYPES, TICKET_LABELS, TICKET_PRICES,
+  calcTotalPrice, totalTicketCount, formatJst,
+  type TicketCounts,
+} from "~/lib/tickets"
+
+type ScheduleInfo = {
+  scheduleId: number
+  movieTitle: string
+  screenName: string
+  startsAt: string
+  endsAt: string
+  remainingSeats: number
+}
+
+export default function TicketsPage() {
+  const { scheduleId } = useParams<{ scheduleId: string }>()
+  const navigate = useNavigate()
+  const [info, setInfo] = useState<ScheduleInfo | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [counts, setCounts] = useState<TicketCounts>({ general: 0, university: 0, highschool: 0, child: 0 })
+  const [totalPrice, setTotalPrice] = useState(0)
+  const [quoting, setQuoting] = useState(false)
+
+  const total = totalTicketCount(counts)
+
+  // 上映回情報を取得
+  useEffect(() => {
+    if (!scheduleId) return
+    apiFetch<ScheduleInfo>(`/schedules/${scheduleId}`)
+      .then(setInfo)
+      .catch(err => {
+        if (err instanceof ApiError && err.status === 404) navigate("/movies", { replace: true })
+      })
+      .finally(() => setLoading(false))
+  }, [scheduleId])
+
+  // 金額プレビュー
+  useEffect(() => {
+    if (!scheduleId || total === 0) { setTotalPrice(calcTotalPrice(counts)); return }
+    setQuoting(true)
+    apiFetch<{ ticketCount: number; totalPrice: number }>("/reservations/quote", {
+      method: "POST",
+      body: JSON.stringify({ scheduleId: Number(scheduleId), ticketCounts: counts }),
+    })
+      .then(d => setTotalPrice(d.totalPrice))
+      .catch(() => setTotalPrice(calcTotalPrice(counts)))
+      .finally(() => setQuoting(false))
+  }, [counts, scheduleId])
+
+  function changeCount(type: (typeof TICKET_TYPES)[number], delta: number) {
+    setCounts(prev => ({
+      ...prev,
+      [type]: Math.max(0, prev[type] + delta),
+    }))
+  }
+
+  function handleNext() {
+    draft.set({ scheduleId: Number(scheduleId), ticketCounts: counts })
+    navigate(`/reservations/seats/${scheduleId}`)
+  }
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="mx-auto max-w-xl px-4 py-8"><p className="text-gray-500">読み込み中...</p></main>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Header />
+      <main className="mx-auto max-w-xl px-4 py-6">
+        {/* ステップ */}
+        <p className="mb-4 text-xs text-gray-400">チケット選択 → 座席選択 → お客様情報 → 確認 → 決済</p>
+
+        {/* 上映情報 */}
+        {info && (
+          <div className="mb-6 rounded-lg border border-gray-200 p-4 text-sm">
+            <p className="font-bold text-lg">{info.movieTitle}</p>
+            <p className="mt-1 text-gray-600">{formatJst(info.startsAt)} 〜 {info.screenName}</p>
+            <p className="mt-0.5 text-gray-500">残{info.remainingSeats}席</p>
+          </div>
+        )}
+
+        {/* 券種選択 */}
+        <h2 className="mb-3 text-lg font-bold">券種と枚数を選ぶ</h2>
+        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
+          {TICKET_TYPES.map(type => (
+            <div key={type} className="flex items-center justify-between px-4 py-3">
+              <div>
+                <p className="font-medium">{TICKET_LABELS[type]}</p>
+                <p className="text-sm text-gray-500">{TICKET_PRICES[type].toLocaleString()}円</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => changeCount(type, -1)}
+                  disabled={counts[type] === 0}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30"
+                >
+                  −
+                </button>
+                <span className="w-4 text-center font-medium">{counts[type]}</span>
+                <button
+                  onClick={() => changeCount(type, 1)}
+                  disabled={total >= 8}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30"
+                >
+                  ＋
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {total > 8 && (
+          <p className="mt-2 text-sm text-red-600">合計枚数は8枚までです。</p>
+        )}
+
+        {/* 合計 */}
+        <div className="mt-4 flex justify-between text-lg font-bold">
+          <span>合計（{total}枚）</span>
+          <span>{quoting ? "..." : `${totalPrice.toLocaleString()}円`}</span>
+        </div>
+
+        <Button
+          size="lg"
+          className="mt-6"
+          disabled={total === 0 || total > 8}
+          onClick={handleNext}
+        >
+          次へ（座席を選ぶ）
+        </Button>
+      </main>
+    </>
+  )
+}

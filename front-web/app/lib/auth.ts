@@ -1,0 +1,19 @@
+import { apiFetch } from "./api"
+
+export type AuthState =
+  | { authenticated: false }
+  | { authenticated: true; memberId: number }
+
+export async function getAuthState(): Promise<AuthState> {
+  try {
+    return await apiFetch<AuthState>("/auth/me")
+  } catch {
+    return { authenticated: false }
+  }
+}
+
+export function safeRedirect(redirect: string | null | undefined): string {
+  if (!redirect) return "/reservations/customer"
+  if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect
+  return "/reservations/customer"
+}
