@@ -1,43 +1,11 @@
-import { useState } from "react"
-import { useNavigate, useSearchParams, Link } from "react-router"
-import { apiFetch, ApiError } from "~/shared/api/client"
-import { safeRedirect } from "~/shared/api/auth"
+import { Link } from "react-router"
 import { Button } from "~/shared/ui/Button"
 import { Input } from "~/shared/ui/Input"
 import { Header } from "~/widgets/Header"
-import { draft } from "~/entities/reservation/draft"
+import { useLogin } from "~/features/auth/useLogin"
 
 export function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const redirect = safeRedirect(searchParams.get("redirect"))
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-    try {
-      await apiFetch("/auth/otp/send", {
-        method: "POST",
-        body: JSON.stringify({ email, type: "login" }),
-      })
-      sessionStorage.setItem("hal_cinema_pending_email", email)
-      navigate(
-        `/auth/otp?type=login&redirect=${encodeURIComponent(redirect)}`,
-      )
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message)
-      } else {
-        setError("エラーが発生しました。時間をおいてお試しください。")
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { email, setEmail, error, loading, redirect, handleSubmit, handleGuestContinue } = useLogin()
 
   return (
     <>
@@ -76,9 +44,7 @@ export function LoginPage() {
           <Link
             to={redirect}
             className="text-gray-400 hover:underline"
-            onClick={() => {
-              draft.set({ bookingType: "guest" })
-            }}
+            onClick={handleGuestContinue}
           >
             ゲストとして続行
           </Link>

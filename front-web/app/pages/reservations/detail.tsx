@@ -1,77 +1,17 @@
-import { useState, useEffect } from "react"
-import { useParams, Link } from "react-router"
-import { apiFetch, ApiError } from "~/shared/api/client"
+import { Link } from "react-router"
 import { Header } from "~/widgets/Header"
 import { Button } from "~/shared/ui/Button"
 import { Input } from "~/shared/ui/Input"
 import { TICKET_LABELS, formatJst } from "~/entities/ticket"
-
-type Seat = { row: string; col: number; ticketType: string; price: number }
-
-type ReservationDetail = {
-  reservationCode: string
-  status: string
-  canCancel: boolean
-  movie: { title: string; thumbnailUrl: string | null }
-  schedule: { startsAt: string; endsAt: string; screenName: string }
-  seats: Seat[]
-  totalPrice: number
-  customer: { name: string; maskedEmail: string }
-  qrCodeUrl: string | null
-}
+import { useReservationDetail } from "~/features/reservation/useReservationDetail"
 
 export function ReservationDetailPage() {
-  const { reservationCode } = useParams<{ reservationCode: string }>()
-  const [detail, setDetail] = useState<ReservationDetail | null>(null)
-  const [notFound, setNotFound] = useState(false)
-  const [showCancelModal, setShowCancelModal] = useState(false)
-  const [cancelEmail, setCancelEmail] = useState("")
-  const [cancelError, setCancelError] = useState("")
-  const [cancelling, setCancelling] = useState(false)
-  const [cancelled, setCancelled] = useState(false)
-
-  useEffect(() => {
-    if (!reservationCode) return
-    apiFetch<ReservationDetail>(`/reservations/${reservationCode.toUpperCase()}`)
-      .then(setDetail)
-      .catch(err => {
-        if (err instanceof ApiError && err.status === 404) setNotFound(true)
-      })
-  }, [reservationCode])
-
-  async function handleCancel() {
-    if (!detail) return
-    setCancelError("")
-    setCancelling(true)
-    try {
-      const body = detail.status === "confirmed" && cancelEmail
-        ? JSON.stringify({ email: cancelEmail })
-        : undefined
-      await apiFetch(`/reservations/${detail.reservationCode}/cancel`, {
-        method: "POST",
-        body,
-      })
-      setCancelled(true)
-      setShowCancelModal(false)
-      setDetail(prev => prev ? { ...prev, status: "cancelled", canCancel: false, qrCodeUrl: null } : prev)
-    } catch (err) {
-      if (err instanceof ApiError) {
-        if (err.code === "FORBIDDEN") {
-          setCancelError("メールアドレスが一致しません。")
-        } else if (err.code === "CANCELLATION_NOT_ALLOWED") {
-          setCancelError("上映開始30分前以降はキャンセルできません。")
-        } else if (err.code === "ALREADY_CANCELLED") {
-          setCancelError("すでにキャンセル済みです。")
-        } else {
-          setCancelError(err.message)
-        }
-      } else {
-        setCancelError("エラーが発生しました。再度お試しください。")
-      }
-    } finally {
-      setCancelling(false)
-    }
-  }
+  const {
+    detail, notFound, cancelled,
+    showCancelModal, setShowCancelModal, closeCancelModal,
+    cancelEmail, setCancelEmail, cancelError,
+    cancelling, handleCancel,
+  } = useReservationDetail()
 
   if (notFound) {
     return (
@@ -130,11 +70,7 @@ export function ReservationDetailPage() {
           <h2 className="mb-2 font-bold text-gray-700">上映情報</h2>
           <div className="flex gap-3">
             {detail.movie.thumbnailUrl && (
-              <img
-                src={detail.movie.thumbnailUrl}
-                alt={detail.movie.title}
-                className="h-20 w-14 rounded object-cover"
-              />
+              <img src={detail.movie.thumbnailUrl} alt={detail.movie.title} className="h-20 w-14 rounded object-cover" />
             )}
             <div>
               <p className="font-bold">{detail.movie.title}</p>
@@ -206,21 +142,10 @@ export function ReservationDetailPage() {
             {cancelError && <p className="mb-3 text-sm text-red-600">{cancelError}</p>}
 
             <div className="flex gap-3">
-              <Button
-                size="md"
-                variant="ghost"
-                className="flex-1"
-                onClick={() => { setShowCancelModal(false); setCancelError(""); setCancelEmail("") }}
-              >
+              <Button size="md" variant="ghost" className="flex-1" onClick={closeCancelModal}>
                 戻る
               </Button>
-              <Button
-                size="md"
-                variant="secondary"
-                className="flex-1"
-                disabled={cancelling}
-                onClick={handleCancel}
-              >
+              <Button size="md" variant="secondary" className="flex-1" disabled={cancelling} onClick={handleCancel}>
                 {cancelling ? "処理中..." : "キャンセルする"}
               </Button>
             </div>

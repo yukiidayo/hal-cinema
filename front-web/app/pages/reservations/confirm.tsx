@@ -1,33 +1,10 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router"
-import { apiFetch } from "~/shared/api/client"
-import { draft } from "~/entities/reservation/draft"
 import { Header } from "~/widgets/Header"
 import { Button } from "~/shared/ui/Button"
 import { TICKET_LABELS, TICKET_PRICES, formatJst } from "~/entities/ticket"
-
-type ScheduleInfo = {
-  movieTitle: string
-  screenName: string
-  startsAt: string
-  endsAt: string
-}
+import { useConfirm } from "~/features/reservation/useConfirm"
 
 export function ConfirmPage() {
-  const navigate = useNavigate()
-  const d = draft.get()
-  const [schedInfo, setSchedInfo] = useState<ScheduleInfo | null>(null)
-
-  useEffect(() => {
-    if (!d.customer?.name || !d.customer?.email) {
-      navigate("/movies", { replace: true })
-      return
-    }
-    if (!d.scheduleId) return
-    apiFetch<ScheduleInfo>(`/schedules/${d.scheduleId}`).then(setSchedInfo).catch(() => {})
-  }, [])
-
-  const totalPrice = d.selectedSeats?.reduce((sum, s) => sum + TICKET_PRICES[s.ticketType], 0) ?? 0
+  const { schedInfo, totalPrice, customer, seats, goToPayment, goBack } = useConfirm()
 
   return (
     <>
@@ -49,7 +26,7 @@ export function ConfirmPage() {
           <h2 className="mb-2 font-bold text-gray-700">座席・券種</h2>
           <table className="w-full text-sm">
             <tbody>
-              {d.selectedSeats?.map(s => (
+              {seats?.map(s => (
                 <tr key={s.seatId} className="border-b border-gray-100 last:border-0">
                   <td className="py-1.5">{s.row}-{s.col}</td>
                   <td className="py-1.5 text-gray-600">{TICKET_LABELS[s.ticketType]}</td>
@@ -66,17 +43,13 @@ export function ConfirmPage() {
 
         <section className="mb-6 rounded-lg border border-gray-200 p-4">
           <h2 className="mb-2 font-bold text-gray-700">お客様情報</h2>
-          <p className="text-sm"><span className="text-gray-500">氏名：</span>{d.customer?.name}</p>
-          <p className="text-sm mt-1"><span className="text-gray-500">メール：</span>{d.customer?.email}</p>
+          <p className="text-sm"><span className="text-gray-500">氏名：</span>{customer?.name}</p>
+          <p className="text-sm mt-1"><span className="text-gray-500">メール：</span>{customer?.email}</p>
         </section>
 
         <div className="flex flex-col gap-3">
-          <Button size="lg" onClick={() => navigate("/reservations/payment")}>
-            お支払いへ進む
-          </Button>
-          <Button size="md" variant="ghost" onClick={() => navigate(-1)}>
-            戻る
-          </Button>
+          <Button size="lg" onClick={goToPayment}>お支払いへ進む</Button>
+          <Button size="md" variant="ghost" onClick={goBack}>戻る</Button>
         </div>
       </main>
     </>

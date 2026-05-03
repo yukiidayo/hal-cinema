@@ -1,68 +1,10 @@
-import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router"
-import { apiFetch, ApiError } from "~/shared/api/client"
-import { draft } from "~/entities/reservation/draft"
 import { Header } from "~/widgets/Header"
 import { Button } from "~/shared/ui/Button"
-import {
-  TICKET_TYPES, TICKET_LABELS, TICKET_PRICES,
-  calcTotalPrice, totalTicketCount, formatJst,
-  type TicketCounts,
-} from "~/entities/ticket"
-
-type ScheduleInfo = {
-  scheduleId: number
-  movieTitle: string
-  screenName: string
-  startsAt: string
-  endsAt: string
-  remainingSeats: number
-}
+import { TICKET_TYPES, TICKET_LABELS, TICKET_PRICES, formatJst } from "~/entities/ticket"
+import { useTicketSelection } from "~/features/reservation/useTicketSelection"
 
 export function TicketsPage() {
-  const { scheduleId } = useParams<{ scheduleId: string }>()
-  const navigate = useNavigate()
-  const [info, setInfo] = useState<ScheduleInfo | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [counts, setCounts] = useState<TicketCounts>({ general: 0, university: 0, highschool: 0, child: 0 })
-  const [totalPrice, setTotalPrice] = useState(0)
-  const [quoting, setQuoting] = useState(false)
-
-  const total = totalTicketCount(counts)
-
-  useEffect(() => {
-    if (!scheduleId) return
-    apiFetch<ScheduleInfo>(`/schedules/${scheduleId}`)
-      .then(setInfo)
-      .catch(err => {
-        if (err instanceof ApiError && err.status === 404) navigate("/movies", { replace: true })
-      })
-      .finally(() => setLoading(false))
-  }, [scheduleId])
-
-  useEffect(() => {
-    if (!scheduleId || total === 0) { setTotalPrice(calcTotalPrice(counts)); return }
-    setQuoting(true)
-    apiFetch<{ ticketCount: number; totalPrice: number }>("/reservations/quote", {
-      method: "POST",
-      body: JSON.stringify({ scheduleId: Number(scheduleId), ticketCounts: counts }),
-    })
-      .then(d => setTotalPrice(d.totalPrice))
-      .catch(() => setTotalPrice(calcTotalPrice(counts)))
-      .finally(() => setQuoting(false))
-  }, [counts, scheduleId])
-
-  function changeCount(type: (typeof TICKET_TYPES)[number], delta: number) {
-    setCounts(prev => ({
-      ...prev,
-      [type]: Math.max(0, prev[type] + delta),
-    }))
-  }
-
-  function handleNext() {
-    draft.set({ scheduleId: Number(scheduleId), ticketCounts: counts })
-    navigate(`/reservations/seats/${scheduleId}`)
-  }
+  const { info, loading, counts, totalPrice, quoting, total, changeCount, handleNext } = useTicketSelection()
 
   if (loading) {
     return (
@@ -125,12 +67,7 @@ export function TicketsPage() {
           <span>{quoting ? "..." : `${totalPrice.toLocaleString()}円`}</span>
         </div>
 
-        <Button
-          size="lg"
-          className="mt-6"
-          disabled={total === 0 || total > 8}
-          onClick={handleNext}
-        >
+        <Button size="lg" className="mt-6" disabled={total === 0 || total > 8} onClick={handleNext}>
           次へ（座席を選ぶ）
         </Button>
       </main>

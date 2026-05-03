@@ -1,25 +1,10 @@
-import { useState, useEffect } from "react"
 import { Link } from "react-router"
 import { Header } from "~/widgets/Header"
 import { Button } from "~/shared/ui/Button"
-
-type ReservationResult = {
-  reservationId: number
-  reservationCode: string
-  totalPrice: number
-  qrCodeUrl: string
-}
+import { useComplete } from "~/features/reservation/useComplete"
 
 export function CompletePage() {
-  const [result, setResult] = useState<ReservationResult | null>(null)
-
-  useEffect(() => {
-    const raw = sessionStorage.getItem("hal_cinema_last_reservation")
-    if (raw) {
-      setResult(JSON.parse(raw) as ReservationResult)
-      sessionStorage.removeItem("hal_cinema_last_reservation")
-    }
-  }, [])
+  const { result } = useComplete()
 
   return (
     <>
@@ -41,11 +26,7 @@ export function CompletePage() {
             {result.qrCodeUrl && (
               <div className="mt-4">
                 <p className="mb-2 text-sm text-gray-500">QRコード（入場時にご提示ください）</p>
-                <img
-                  src={result.qrCodeUrl}
-                  alt="QRコード"
-                  className="mx-auto h-40 w-40 rounded"
-                />
+                <img src={result.qrCodeUrl} alt="QRコード" className="mx-auto h-40 w-40 rounded" />
               </div>
             )}
           </div>

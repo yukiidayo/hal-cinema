@@ -1,23 +1,10 @@
-import { useEffect } from "react"
-import { useNavigate, Link } from "react-router"
-import { draft } from "~/entities/reservation/draft"
+import { Link } from "react-router"
 import { Header } from "~/widgets/Header"
 import { Button } from "~/shared/ui/Button"
+import { useEntry } from "~/features/reservation/useEntry"
 
 export function EntryPage() {
-  const navigate = useNavigate()
-  const d = draft.get()
-
-  useEffect(() => {
-    if (!d.selectedSeats || d.selectedSeats.length === 0) {
-      navigate("/movies", { replace: true })
-    }
-  }, [])
-
-  function handleGuest() {
-    draft.set({ bookingType: "guest" })
-    navigate("/reservations/customer")
-  }
+  const { handleGuest } = useEntry()
 
   return (
     <>

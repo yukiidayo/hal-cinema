@@ -1,40 +1,11 @@
-import { useState, useEffect } from "react"
-import { useParams, useSearchParams, useNavigate, Link } from "react-router"
-import { apiFetch, ApiError } from "~/shared/api/client"
+import { Link } from "react-router"
 import { Header } from "~/widgets/Header"
 import { Button } from "~/shared/ui/Button"
 import { formatJst } from "~/entities/ticket"
-import { getNext7Days } from "~/shared/lib/date"
-import type { Movie, Schedule } from "~/entities/movie/types"
+import { useSchedules } from "~/features/movie/useSchedules"
 
 export function SchedulesPage() {
-  const { movieId } = useParams<{ movieId: string }>()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const selectedDate = searchParams.get("date") ?? ""
-  const navigate = useNavigate()
-
-  const [data, setData] = useState<{ movie: Movie; schedules: Schedule[] } | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const days = getNext7Days()
-
-  useEffect(() => {
-    if (!movieId) return
-    setLoading(true)
-    setError("")
-    const qs = selectedDate ? `?date=${selectedDate}` : ""
-    apiFetch<{ movie: Movie; schedules: Schedule[] }>(`/movies/${movieId}/schedules${qs}`)
-      .then(setData)
-      .catch(err => {
-        if (err instanceof ApiError && err.status === 404) navigate("/movies", { replace: true })
-        else setError("読み込みに失敗しました")
-      })
-      .finally(() => setLoading(false))
-  }, [movieId, selectedDate])
-
-  function selectSchedule(scheduleId: number) {
-    navigate(`/reservations/tickets/${scheduleId}`)
-  }
+  const { data, loading, error, days, selectedDate, setDate, selectSchedule } = useSchedules()
 
   return (
     <>
@@ -68,7 +39,7 @@ export function SchedulesPage() {
         {/* 日付ナビ */}
         <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
           <button
-            onClick={() => setSearchParams(p => { const n = new URLSearchParams(p); n.delete("date"); return n })}
+            onClick={() => setDate("")}
             className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
               !selectedDate ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
@@ -78,7 +49,7 @@ export function SchedulesPage() {
           {days.map(d => (
             <button
               key={d.iso}
-              onClick={() => setSearchParams(p => { const n = new URLSearchParams(p); n.set("date", d.iso); return n })}
+              onClick={() => setDate(d.iso)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
                 selectedDate === d.iso ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
