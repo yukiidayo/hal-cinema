@@ -3,7 +3,7 @@ import { Button } from "~/shared/ui/Button"
 import { TICKET_TYPES, TICKET_LABELS, TICKET_PRICES, formatJst } from "~/entities/ticket"
 import { useTicketSelection } from "~/features/reservation/useTicketSelection"
 
-export function TicketsPage() {
+export default function TicketsPage() {
   const { info, loading, counts, totalPrice, quoting, total, changeCount, handleNext } = useTicketSelection()
 
   if (loading) {
@@ -38,29 +38,17 @@ export function TicketsPage() {
                 <p className="text-sm text-gray-500">{TICKET_PRICES[type].toLocaleString()}円</p>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => changeCount(type, -1)}
-                  disabled={counts[type] === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30"
-                >
-                  −
-                </button>
+                <button onClick={() => changeCount(type, -1)} disabled={counts[type] === 0}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30">−</button>
                 <span className="w-4 text-center font-medium">{counts[type]}</span>
-                <button
-                  onClick={() => changeCount(type, 1)}
-                  disabled={total >= 8}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30"
-                >
-                  ＋
-                </button>
+                <button onClick={() => changeCount(type, 1)} disabled={total >= 8}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30">＋</button>
               </div>
             </div>
           ))}
         </div>
 
-        {total > 8 && (
-          <p className="mt-2 text-sm text-red-600">合計枚数は8枚までです。</p>
-        )}
+        {total > 8 && <p className="mt-2 text-sm text-red-600">合計枚数は8枚までです。</p>}
 
         <div className="mt-4 flex justify-between text-lg font-bold">
           <span>合計（{total}枚）</span>

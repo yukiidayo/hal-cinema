@@ -4,7 +4,7 @@ import { Input } from "~/shared/ui/Input"
 import { Header } from "~/widgets/Header"
 import { useLogin } from "~/features/auth/useLogin"
 
-export function LoginPage() {
+export default function LoginPage() {
   const { email, setEmail, error, loading, redirect, handleSubmit, handleGuestContinue } = useLogin()
 
   return (
@@ -34,18 +34,11 @@ export function LoginPage() {
         <div className="mt-6 flex flex-col gap-2 text-center text-sm text-gray-500">
           <p>
             アカウントをお持ちでない方は{" "}
-            <Link
-              to={`/register?redirect=${encodeURIComponent(redirect)}`}
-              className="text-red-600 hover:underline"
-            >
+            <Link to={`/register?redirect=${encodeURIComponent(redirect)}`} className="text-red-600 hover:underline">
               新規会員登録
             </Link>
           </p>
-          <Link
-            to={redirect}
-            className="text-gray-400 hover:underline"
-            onClick={handleGuestContinue}
-          >
+          <Link to={redirect} className="text-gray-400 hover:underline" onClick={handleGuestContinue}>
             ゲストとして続行
           </Link>
         </div>

@@ -3,7 +3,7 @@ import { Button } from "~/shared/ui/Button"
 import { Input } from "~/shared/ui/Input"
 import { useLookup } from "~/features/reservation/useLookup"
 
-export function LookupPage() {
+export default function LookupPage() {
   const { code, setCode, loading, error, handleSubmit } = useLookup()
 
   return (
@@ -11,19 +11,12 @@ export function LookupPage() {
       <Header />
       <main className="mx-auto max-w-md px-4 py-12">
         <h1 className="mb-2 text-2xl font-bold">予約確認</h1>
-        <p className="mb-6 text-sm text-gray-500">
-          予約番号を入力して予約内容を確認できます。
-        </p>
+        <p className="mb-6 text-sm text-gray-500">予約番号を入力して予約内容を確認できます。</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input
-            id="code"
-            label="予約番号"
-            value={code}
+          <Input id="code" label="予約番号" value={code}
             onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12))}
-            placeholder="例：ABCD1234"
-            autoComplete="off"
-          />
+            placeholder="例：ABCD1234" autoComplete="off" />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" size="lg" disabled={loading}>
             {loading ? "検索中..." : "予約を確認する"}

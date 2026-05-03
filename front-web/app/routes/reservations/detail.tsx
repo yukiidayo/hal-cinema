@@ -5,7 +5,7 @@ import { Input } from "~/shared/ui/Input"
 import { TICKET_LABELS, formatJst } from "~/entities/ticket"
 import { useReservationDetail } from "~/features/reservation/useReservationDetail"
 
-export function ReservationDetailPage() {
+export default function ReservationDetailPage() {
   const {
     detail, notFound, cancelled,
     showCancelModal, setShowCancelModal, closeCancelModal,
@@ -49,9 +49,7 @@ export function ReservationDetailPage() {
         </div>
 
         {cancelled && (
-          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-            予約をキャンセルしました。
-          </div>
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">予約をキャンセルしました。</div>
         )}
 
         <div className="mb-4 rounded-lg border border-gray-200 p-4 text-center">
@@ -87,17 +85,14 @@ export function ReservationDetailPage() {
               {detail.seats.map((s, i) => (
                 <tr key={i} className="border-b border-gray-100 last:border-0">
                   <td className="py-1.5">{s.row}-{s.col}</td>
-                  <td className="py-1.5 text-gray-600">
-                    {TICKET_LABELS[s.ticketType as keyof typeof TICKET_LABELS] ?? s.ticketType}
-                  </td>
+                  <td className="py-1.5 text-gray-600">{TICKET_LABELS[s.ticketType as keyof typeof TICKET_LABELS] ?? s.ticketType}</td>
                   <td className="py-1.5 text-right">{s.price.toLocaleString()}円</td>
                 </tr>
               ))}
             </tbody>
           </table>
           <div className="mt-2 flex justify-between border-t border-gray-200 pt-2 font-bold">
-            <span>合計</span>
-            <span>{detail.totalPrice.toLocaleString()}円</span>
+            <span>合計</span><span>{detail.totalPrice.toLocaleString()}円</span>
           </div>
         </section>
 
@@ -109,9 +104,7 @@ export function ReservationDetailPage() {
 
         <div className="flex flex-col gap-3">
           {detail.canCancel && (
-            <Button size="md" variant="secondary" onClick={() => setShowCancelModal(true)}>
-              予約をキャンセルする
-            </Button>
+            <Button size="md" variant="secondary" onClick={() => setShowCancelModal(true)}>予約をキャンセルする</Button>
           )}
           <Link to="/movies">
             <Button size="md" variant="ghost" className="w-full">映画一覧へ</Button>
@@ -123,28 +116,15 @@ export function ReservationDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h2 className="mb-3 text-lg font-bold">予約をキャンセルしますか？</h2>
-            <p className="mb-4 text-sm text-gray-600">
-              キャンセル後は元に戻せません。本当にキャンセルしますか？
-            </p>
-
+            <p className="mb-4 text-sm text-gray-600">キャンセル後は元に戻せません。本当にキャンセルしますか？</p>
             <div className="mb-4">
-              <Input
-                id="cancelEmail"
-                type="email"
-                label="予約時のメールアドレスを入力して確認"
-                value={cancelEmail}
-                onChange={e => setCancelEmail(e.target.value)}
-                placeholder="example@email.com"
-                autoComplete="email"
-              />
+              <Input id="cancelEmail" type="email" label="予約時のメールアドレスを入力して確認"
+                value={cancelEmail} onChange={e => setCancelEmail(e.target.value)}
+                placeholder="example@email.com" autoComplete="email" />
             </div>
-
             {cancelError && <p className="mb-3 text-sm text-red-600">{cancelError}</p>}
-
             <div className="flex gap-3">
-              <Button size="md" variant="ghost" className="flex-1" onClick={closeCancelModal}>
-                戻る
-              </Button>
+              <Button size="md" variant="ghost" className="flex-1" onClick={closeCancelModal}>戻る</Button>
               <Button size="md" variant="secondary" className="flex-1" disabled={cancelling} onClick={handleCancel}>
                 {cancelling ? "処理中..." : "キャンセルする"}
               </Button>

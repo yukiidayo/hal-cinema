@@ -3,7 +3,7 @@ import { Header } from "~/widgets/Header"
 import { Button } from "~/shared/ui/Button"
 import { useEntry } from "~/features/reservation/useEntry"
 
-export function EntryPage() {
+export default function EntryPage() {
   const { handleGuest } = useEntry()
 
   return (
@@ -15,19 +15,13 @@ export function EntryPage() {
 
         <div className="flex flex-col gap-3">
           <Link to="/login?redirect=/reservations/customer">
-            <Button size="lg" className="w-full" variant="primary">
-              ログインして予約
-            </Button>
+            <Button size="lg" className="w-full" variant="primary">ログインして予約</Button>
           </Link>
           <Link to="/register?redirect=/reservations/customer">
-            <Button size="lg" className="w-full" variant="secondary">
-              新規会員登録して予約
-            </Button>
+            <Button size="lg" className="w-full" variant="secondary">新規会員登録して予約</Button>
           </Link>
-          <button
-            onClick={handleGuest}
-            className="rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 transition"
-          >
+          <button onClick={handleGuest}
+            className="rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 transition">
             ゲストとして続行（メールアドレスのみ）
           </button>
         </div>

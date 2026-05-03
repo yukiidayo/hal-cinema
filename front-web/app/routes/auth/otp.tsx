@@ -3,7 +3,7 @@ import { Input } from "~/shared/ui/Input"
 import { Header } from "~/widgets/Header"
 import { useOtp } from "~/features/auth/useOtp"
 
-export function AuthOtpPage() {
+export default function AuthOtpPage() {
   const { code, setCode, error, loading, email, resendCooldown, resending, handleSubmit, handleResend } = useOtp()
 
   return (
@@ -37,12 +37,7 @@ export function AuthOtpPage() {
           {resendCooldown > 0 ? (
             <p className="text-gray-400">再送まで {resendCooldown} 秒</p>
           ) : (
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resending}
-              className="text-red-600 hover:underline disabled:opacity-50"
-            >
+            <button type="button" onClick={handleResend} disabled={resending} className="text-red-600 hover:underline disabled:opacity-50">
               {resending ? "送信中..." : "認証コードを再送する"}
             </button>
           )}

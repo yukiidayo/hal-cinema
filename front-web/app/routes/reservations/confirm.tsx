@@ -3,7 +3,7 @@ import { Button } from "~/shared/ui/Button"
 import { TICKET_LABELS, TICKET_PRICES, formatJst } from "~/entities/ticket"
 import { useConfirm } from "~/features/reservation/useConfirm"
 
-export function ConfirmPage() {
+export default function ConfirmPage() {
   const { schedInfo, totalPrice, customer, seats, goToPayment, goBack } = useConfirm()
 
   return (
@@ -36,8 +36,7 @@ export function ConfirmPage() {
             </tbody>
           </table>
           <div className="mt-2 flex justify-between font-bold text-base border-t border-gray-200 pt-2">
-            <span>合計</span>
-            <span>{totalPrice.toLocaleString()}円</span>
+            <span>合計</span><span>{totalPrice.toLocaleString()}円</span>
           </div>
         </section>
 

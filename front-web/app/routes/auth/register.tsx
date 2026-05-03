@@ -4,7 +4,7 @@ import { Input } from "~/shared/ui/Input"
 import { Header } from "~/widgets/Header"
 import { useRegister } from "~/features/auth/useRegister"
 
-export function RegisterPage() {
+export default function RegisterPage() {
   const { email, setEmail, error, loading, redirect, handleSubmit } = useRegister()
 
   return (
@@ -33,10 +33,7 @@ export function RegisterPage() {
         </form>
         <p className="mt-6 text-center text-sm text-gray-500">
           既にアカウントをお持ちの方は{" "}
-          <Link
-            to={`/login?redirect=${encodeURIComponent(redirect)}`}
-            className="text-red-600 hover:underline"
-          >
+          <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className="text-red-600 hover:underline">
             ログイン
           </Link>
         </p>

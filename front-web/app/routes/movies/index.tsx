@@ -2,7 +2,7 @@ import { Link } from "react-router"
 import { Header } from "~/widgets/Header"
 import { useMovies } from "~/features/movie/useMovies"
 
-export function MoviesPage() {
+export default function MoviesPage() {
   const { movies, loading, error, days, selectedDate, selectedStatus, setDate, setStatus } = useMovies()
 
   return (
@@ -79,9 +79,7 @@ export function MoviesPage() {
                 <h2 className="line-clamp-2 text-sm font-bold leading-tight">{movie.title}</h2>
                 <p className="mt-1 text-xs text-gray-500">{movie.durationMin}分</p>
                 <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                  movie.status === "now_showing"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-orange-100 text-orange-700"
+                  movie.status === "now_showing" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
                 }`}>
                   {movie.status === "now_showing" ? "上映中" : "上映予定"}
                 </span>

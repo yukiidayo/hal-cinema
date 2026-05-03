@@ -4,29 +4,23 @@ import { Button } from "~/shared/ui/Button"
 import { formatJst } from "~/entities/ticket"
 import { useSchedules } from "~/features/movie/useSchedules"
 
-export function SchedulesPage() {
+export default function SchedulesPage() {
   const { data, loading, error, days, selectedDate, setDate, selectSchedule } = useSchedules()
 
   return (
     <>
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-6">
-        {/* パンくず */}
         <nav className="mb-4 text-sm text-gray-500">
           <Link to="/movies" className="hover:underline">映画一覧</Link>
           <span className="mx-2">/</span>
           <span>{data?.movie.title ?? "..."}</span>
         </nav>
 
-        {/* 映画ヘッダー */}
         {data && (
           <div className="mb-6 flex gap-4">
             {data.movie.thumbnailUrl && (
-              <img
-                src={data.movie.thumbnailUrl}
-                alt={data.movie.title}
-                className="w-24 shrink-0 rounded-lg object-cover"
-              />
+              <img src={data.movie.thumbnailUrl} alt={data.movie.title} className="w-24 shrink-0 rounded-lg object-cover" />
             )}
             <div>
               <h1 className="text-2xl font-bold">{data.movie.title}</h1>
@@ -36,7 +30,6 @@ export function SchedulesPage() {
           </div>
         )}
 
-        {/* 日付ナビ */}
         <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => setDate("")}
@@ -69,21 +62,12 @@ export function SchedulesPage() {
 
         <div className="flex flex-col gap-3">
           {data?.schedules.map(sch => (
-            <div
-              key={sch.scheduleId}
-              className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
-            >
+            <div key={sch.scheduleId} className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
               <div>
                 <p className="font-medium">{formatJst(sch.startsAt)} 〜</p>
-                <p className="mt-0.5 text-sm text-gray-500">
-                  {sch.screenName} ・ 残{sch.remainingSeats}席
-                </p>
+                <p className="mt-0.5 text-sm text-gray-500">{sch.screenName} ・ 残{sch.remainingSeats}席</p>
               </div>
-              <Button
-                size="sm"
-                disabled={sch.remainingSeats === 0}
-                onClick={() => selectSchedule(sch.scheduleId)}
-              >
+              <Button size="sm" disabled={sch.remainingSeats === 0} onClick={() => selectSchedule(sch.scheduleId)}>
                 {sch.remainingSeats === 0 ? "満席" : "選ぶ"}
               </Button>
             </div>
