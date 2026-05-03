@@ -1,5 +1,4 @@
-export type TicketType = "general" | "university" | "highschool" | "child"
-export type TicketCounts = Record<TicketType, number>
+import type { TicketType, TicketCounts } from "~/entities/ticket"
 
 export type SelectedSeat = {
   seatId: number
@@ -39,10 +38,5 @@ export const draft = {
   clear(): void {
     if (typeof window === "undefined") return
     sessionStorage.removeItem(KEY)
-  },
-
-  totalTickets(counts?: TicketCounts): number {
-    if (!counts) return 0
-    return Object.values(counts).reduce((a, b) => a + b, 0)
   },
 }

@@ -1,4 +1,5 @@
 export type TicketType = "general" | "university" | "highschool" | "child"
+export type TicketCounts = Record<TicketType, number>
 
 export const TICKET_PRICES: Record<TicketType, number> = {
   general: 1800,
@@ -15,8 +16,6 @@ export const TICKET_LABELS: Record<TicketType, string> = {
 }
 
 export const TICKET_TYPES: TicketType[] = ["general", "university", "highschool", "child"]
-
-export type TicketCounts = Record<TicketType, number>
 
 export function buildTypeQueue(counts: TicketCounts): TicketType[] {
   return TICKET_TYPES.flatMap(type => Array<TicketType>(counts[type]).fill(type))
