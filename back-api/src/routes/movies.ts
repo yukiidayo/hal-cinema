@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
-import { z } from 'zod'
-import type mysql from 'mysql2/promise'
 import type { AppEnv } from '../types.js'
 import { pool } from '../db/client.js'
 import { AppError } from '../lib/errors.js'
 import { successResponse } from '../lib/response.js'
+import { MovieService } from '../services/movieService.js'
+import type mysql from 'mysql2/promise'
 
 export const moviesRouter = new Hono<AppEnv>()
 
@@ -39,18 +39,50 @@ moviesRouter.get('/movies', async (c) => {
   }
   sql += ' ORDER BY created_at DESC'
 
-  const [rows] = await pool.execute<mysql.RowDataPacket[]>(sql, params)
+  const [movieRows] = await pool.execute<mysql.RowDataPacket[]>(sql, params)
+
+  const items = await Promise.all(movieRows.map(async (r) => {
+    const schedules = date ? await MovieService.getSchedulesByMovieId(r.id, date) : []
+    return {
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      durationMin: r.duration_min,
+      thumbnailUrl: r.thumbnail_url,
+      status: r.status,
+      schedules: schedules.map(s => ({
+        scheduleId: s.schedule_id,
+        screenName: s.screen_name,
+        startsAt: s.starts_at,
+        endsAt: s.ends_at,
+        remainingSeats: Number(s.remaining_seats),
+      })),
+    }
+  }))
+
+  return c.json(successResponse({ items }, requestId))
+})
+
+// GET /api/movies/:movieId
+moviesRouter.get('/movies/:movieId', async (c) => {
+  const requestId = c.get('requestId')
+  const movieId = Number(c.req.param('movieId'))
+
+  if (!Number.isInteger(movieId) || movieId <= 0) {
+    throw new AppError('VALIDATION_ERROR', 'Invalid movieId')
+  }
+
+  const movie = await MovieService.getMovieById(movieId)
+  if (!movie) throw new AppError('NOT_FOUND', 'Movie not found')
 
   return c.json(
     successResponse({
-      items: rows.map(r => ({
-        id: r.id,
-        title: r.title,
-        description: r.description,
-        durationMin: r.duration_min,
-        thumbnailUrl: r.thumbnail_url,
-        status: r.status,
-      })),
+      id: movie.id,
+      title: movie.title,
+      description: movie.description,
+      durationMin: movie.duration_min,
+      thumbnailUrl: movie.thumbnail_url,
+      status: movie.status,
     }, requestId),
   )
 })
@@ -68,46 +100,20 @@ moviesRouter.get('/movies/:movieId/schedules', async (c) => {
     throw new AppError('VALIDATION_ERROR', 'date must be YYYY-MM-DD')
   }
 
-  const [movieRows] = await pool.execute<mysql.RowDataPacket[]>(
-    'SELECT id, title, description, duration_min, thumbnail_url, status FROM movies WHERE id = ?',
-    [movieId],
-  )
-  if (movieRows.length === 0) throw new AppError('NOT_FOUND', 'Movie not found')
+  const movie = await MovieService.getMovieById(movieId)
+  if (!movie) throw new AppError('NOT_FOUND', 'Movie not found')
 
-  let sql = `
-    SELECT
-      sch.id as schedule_id,
-      sc.name as screen_name,
-      sch.starts_at,
-      sch.ends_at,
-      sc.total_seats - COALESCE((
-        SELECT COUNT(*) FROM reservation_seats rs
-        JOIN reservations r ON r.id = rs.reservation_id
-        WHERE rs.schedule_id = sch.id AND r.status = 'confirmed'
-      ), 0) as remaining_seats
-    FROM schedules sch
-    JOIN screens sc ON sc.id = sch.screen_id
-    WHERE sch.movie_id = ? AND sch.is_public = 1`
-  const params: (string | number)[] = [movieId]
+  const rows = await MovieService.getSchedulesByMovieId(movieId, date)
 
-  if (date) {
-    sql += ` AND DATE(CONVERT_TZ(sch.starts_at, '+00:00', '+09:00')) = ?`
-    params.push(date)
-  }
-  sql += ' ORDER BY sch.starts_at'
-
-  const [rows] = await pool.execute<mysql.RowDataPacket[]>(sql, params)
-
-  const m = movieRows[0]
   return c.json(
     successResponse({
       movie: {
-        id: m.id,
-        title: m.title,
-        description: m.description,
-        durationMin: m.duration_min,
-        thumbnailUrl: m.thumbnail_url,
-        status: m.status,
+        id: movie.id,
+        title: movie.title,
+        description: movie.description,
+        durationMin: movie.duration_min,
+        thumbnailUrl: movie.thumbnail_url,
+        status: movie.status,
       },
       schedules: rows.map(r => ({
         scheduleId: r.schedule_id,
@@ -129,31 +135,9 @@ moviesRouter.get('/schedules/:scheduleId', async (c) => {
     throw new AppError('VALIDATION_ERROR', 'Invalid scheduleId')
   }
 
-  const [rows] = await pool.execute<mysql.RowDataPacket[]>(
-    `SELECT
-       sch.id as schedule_id,
-       sch.movie_id,
-       m.title as movie_title,
-       m.thumbnail_url,
-       m.duration_min,
-       sc.name as screen_name,
-       sch.starts_at,
-       sch.ends_at,
-       sc.total_seats - COALESCE((
-         SELECT COUNT(*) FROM reservation_seats rs
-         JOIN reservations r ON r.id = rs.reservation_id
-         WHERE rs.schedule_id = sch.id AND r.status = 'confirmed'
-       ), 0) as remaining_seats
-     FROM schedules sch
-     JOIN movies m ON m.id = sch.movie_id
-     JOIN screens sc ON sc.id = sch.screen_id
-     WHERE sch.id = ? AND sch.is_public = 1`,
-    [scheduleId],
-  )
+  const r = await MovieService.getFullScheduleById(scheduleId)
+  if (!r) throw new AppError('NOT_FOUND', 'Schedule not found')
 
-  if (rows.length === 0) throw new AppError('NOT_FOUND', 'Schedule not found')
-
-  const r = rows[0]
   return c.json(
     successResponse({
       scheduleId: r.schedule_id,

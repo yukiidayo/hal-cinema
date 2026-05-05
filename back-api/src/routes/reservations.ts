@@ -1,54 +1,17 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type mysql from 'mysql2/promise'
 import type { AppEnv } from '../types.js'
 import { pool } from '../db/client.js'
 import { AppError } from '../lib/errors.js'
 import { successResponse } from '../lib/response.js'
 import { sendReservationEmail } from '../lib/email.js'
 import { checkRateLimit } from '../lib/rateLimit.js'
+import { ReservationService } from '../services/reservationService.js'
+import { MovieService } from '../services/movieService.js'
+import { maskEmail, getQrCodeUrl, toJstString } from '../lib/utils.js'
+import { TICKET_LABELS, TICKET_PRICES } from '../shared/constants.js'
 
 export const reservationsRouter = new Hono<AppEnv>()
-
-const TICKET_PRICES = {
-  general: 1800,
-  university: 1600,
-  highschool: 1400,
-  child: 1000,
-} as const
-
-const TICKET_LABELS = {
-  general: '一般',
-  university: '大学生',
-  highschool: '高校生以下',
-  child: '子供',
-} as const
-
-type TicketType = keyof typeof TICKET_PRICES
-
-function generateReservationCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-}
-
-function getQrCodeUrl(code: string): string {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(code)}&format=png`
-}
-
-function toJstString(d: Date): string {
-  return d.toLocaleString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
-
-function maskEmail(email: string): string {
-  const at = email.indexOf('@')
-  if (at <= 0) return email
-  const visible = email.slice(0, Math.min(2, at))
-  return `${visible}***${email.slice(at)}`
-}
 
 // POST /api/reservations/quote
 reservationsRouter.post('/reservations/quote', async (c) => {
@@ -85,17 +48,13 @@ reservationsRouter.get('/reservations/schedules/:scheduleId/seats', async (c) =>
     throw new AppError('VALIDATION_ERROR', 'Invalid scheduleId')
   }
 
-  const [schedRows] = await pool.execute<mysql.RowDataPacket[]>(
-    `SELECT sch.id, sch.screen_id FROM schedules sch WHERE sch.id = ? AND sch.is_public = 1`,
-    [scheduleId],
-  )
-  if (schedRows.length === 0) throw new AppError('NOT_FOUND', 'Schedule not found')
-  const screenId = schedRows[0].screen_id as number
+  const sched = await MovieService.getFullScheduleById(scheduleId)
+  if (!sched) throw new AppError('NOT_FOUND', 'Schedule not found')
 
   const [layoutRows] = await pool.execute<mysql.RowDataPacket[]>(
     `SELECT id, layout_version, background_image_url, aspect_ratio_width, aspect_ratio_height
      FROM screen_seat_layouts WHERE screen_id = ?`,
-    [screenId],
+    [sched.screen_id],
   )
   if (layoutRows.length === 0) throw new AppError('NOT_FOUND', 'Seat layout not found')
   const layout = layoutRows[0]
@@ -111,17 +70,18 @@ reservationsRouter.get('/reservations/schedules/:scheduleId/seats', async (c) =>
        END as status
      FROM seats s
      LEFT JOIN reservation_seats rs ON rs.schedule_id = ? AND rs.seat_id = s.id
-     LEFT JOIN reservations r ON r.id = rs.reservation_id AND r.status = 'confirmed'
+     LEFT JOIN reservations r ON r.id = rs.reservation_id 
+     AND (r.status = 'confirmed' OR (r.status = 'pending' AND r.expires_at > CURRENT_TIMESTAMP(3)))
      WHERE s.screen_id = ?
      ORDER BY s.row_label, s.col_no`,
-    [scheduleId, screenId],
+    [scheduleId, sched.screen_id],
   )
 
   return c.json(
     successResponse({
       scheduleId,
       layout: {
-        screenId,
+        screenId: sched.screen_id,
         layoutVersion: layout.layout_version as number,
         backgroundImageUrl: layout.background_image_url as string,
         aspectRatio: `${layout.aspect_ratio_width}/${layout.aspect_ratio_height}`,
@@ -141,6 +101,22 @@ reservationsRouter.get('/reservations/schedules/:scheduleId/seats', async (c) =>
   )
 })
 
+// POST /api/reservations/hold (座席の仮押さえ)
+reservationsRouter.post('/reservations/hold', async (c) => {
+  const requestId = c.get('requestId')
+  const body = await c.req.json().catch(() => { throw new AppError('VALIDATION_ERROR', 'Invalid JSON') })
+
+  const schema = z.object({
+    scheduleId: z.number().int().positive(),
+    seatIds: z.array(z.number().int().positive()).min(1).max(8),
+  })
+  const { scheduleId, seatIds } = schema.parse(body)
+
+  const { reservationCode, expiresAt } = await ReservationService.holdSeats(scheduleId, seatIds)
+
+  return c.json(successResponse({ reservationCode, expiresAt: expiresAt.toISOString() }, requestId), 201)
+})
+
 // POST /api/reservations
 reservationsRouter.post('/reservations', async (c) => {
   const requestId = c.get('requestId')
@@ -155,6 +131,7 @@ reservationsRouter.post('/reservations', async (c) => {
   const body = await c.req.json().catch(() => { throw new AppError('VALIDATION_ERROR', 'Invalid JSON') })
 
   const schema = z.object({
+    reservationCode: z.string().optional(),
     scheduleId: z.number().int().positive(),
     layoutVersion: z.number().int().positive(),
     seatIds: z.array(z.number().int().positive()).min(1).max(8),
@@ -171,97 +148,45 @@ reservationsRouter.post('/reservations', async (c) => {
 
   const data = schema.parse(body)
 
-  // seatIds と tickets[].seatId が一致することを確認
   const seatIdSet = new Set(data.seatIds)
-  const ticketSeatIdSet = new Set(data.tickets.map(t => t.seatId))
-  if (seatIdSet.size !== ticketSeatIdSet.size || ![...seatIdSet].every(id => ticketSeatIdSet.has(id))) {
-    throw new AppError('VALIDATION_ERROR', 'seatIds and tickets[].seatId must match')
+  if (seatIdSet.size !== data.seatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'Duplicate seat IDs')
   }
 
-  // 会員予約はセッション必須
-  if (data.bookingType === 'member' && !session) {
-    throw new AppError('UNAUTHORIZED', 'Login required for member booking')
+  let memberId: number | null = null
+  if (data.bookingType === 'member') {
+    if (!session) throw new AppError('UNAUTHORIZED', 'Authentication required for member booking')
+    memberId = session.memberId
   }
-  const memberId = session?.memberId ?? null
 
-  // スケジュール取得
-  const [schedRows] = await pool.execute<mysql.RowDataPacket[]>(
-    `SELECT sch.id, sch.screen_id, m.title as movie_title,
-            sc.name as screen_name, sch.starts_at, sch.ends_at
-     FROM schedules sch
-     JOIN movies m ON m.id = sch.movie_id
-     JOIN screens sc ON sc.id = sch.screen_id
-     WHERE sch.id = ? AND sch.is_public = 1`,
-    [data.scheduleId],
-  )
-  if (schedRows.length === 0) throw new AppError('NOT_FOUND', 'Schedule not found')
-  const sched = schedRows[0]
+  const sched = await MovieService.getFullScheduleById(data.scheduleId)
+  if (!sched) throw new AppError('NOT_FOUND', 'Schedule not found')
 
-  // レイアウトバージョン検証
   const [layoutRows] = await pool.execute<mysql.RowDataPacket[]>(
-    'SELECT layout_version FROM screen_seat_layouts WHERE screen_id = ?',
-    [sched.screen_id],
+    `SELECT layout_version FROM screen_seat_layouts WHERE screen_id = ?`,
+    [sched.screen_id]
   )
-  if (layoutRows.length === 0 || (layoutRows[0].layout_version as number) !== data.layoutVersion) {
-    throw new AppError('SEAT_LAYOUT_VERSION_MISMATCH', 'Seat layout updated. Please refresh the seat map.')
+  if (layoutRows.length === 0 || layoutRows[0].layout_version !== data.layoutVersion) {
+    throw new AppError('SEAT_LAYOUT_VERSION_MISMATCH', 'Seat layout has been updated')
   }
 
-  // 座席情報取得（メール用）
   const placeholders = data.seatIds.map(() => '?').join(',')
-  const [seatInfoRows] = await pool.execute<mysql.RowDataPacket[]>(
-    `SELECT id, row_label, col_no FROM seats WHERE id IN (${placeholders})`,
-    data.seatIds,
+  const [seatRows] = await pool.execute<mysql.RowDataPacket[]>(
+    `SELECT id, row_label, col_no FROM seats WHERE id IN (${placeholders}) AND screen_id = ?`,
+    [...data.seatIds, sched.screen_id]
   )
-  const seatInfoMap = new Map(seatInfoRows.map(s => [s.id as number, s]))
-
-  // 合計金額
-  const totalPrice = data.tickets.reduce((sum, t) => sum + TICKET_PRICES[t.ticketType], 0)
-
-  // 予約コード生成（衝突時リトライ）
-  let reservationCode = ''
-  for (let i = 0; i < 5; i++) {
-    const candidate = generateReservationCode()
-    const [existing] = await pool.execute<mysql.RowDataPacket[]>(
-      'SELECT id FROM reservations WHERE reservation_code = ?', [candidate],
-    )
-    if (existing.length === 0) { reservationCode = candidate; break }
+  if (seatRows.length !== data.seatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'One or more invalid seat IDs')
   }
-  if (!reservationCode) throw new AppError('INTERNAL_SERVER_ERROR', 'Failed to generate reservation code')
+  const seatInfoMap = new Map(seatRows.map(s => [s.id as number, s]))
 
-  // トランザクション
-  const conn = await pool.getConnection()
-  await conn.beginTransaction()
-  let reservationId: number
-  try {
-    const [resResult] = await conn.execute<mysql.ResultSetHeader>(
-      `INSERT INTO reservations
-         (reservation_code, schedule_id, member_id, booking_type, customer_name, customer_email, total_price)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [reservationCode, data.scheduleId, memberId, data.bookingType, data.customer.name, data.customer.email, totalPrice],
-    )
-    reservationId = resResult.insertId
-
-    for (const ticket of data.tickets) {
-      await conn.execute(
-        `INSERT INTO reservation_seats (reservation_id, schedule_id, seat_id, ticket_type, price)
-         VALUES (?, ?, ?, ?, ?)`,
-        [reservationId, data.scheduleId, ticket.seatId, ticket.ticketType, TICKET_PRICES[ticket.ticketType]],
-      )
-    }
-    await conn.commit()
-  } catch (err: unknown) {
-    await conn.rollback()
-    if ((err as { errno?: number }).errno === 1062) {
-      throw new AppError('SEAT_ALREADY_RESERVED', 'One or more seats are already reserved')
-    }
-    throw err
-  } finally {
-    conn.release()
-  }
+  const { reservationId, reservationCode, totalPrice } = await ReservationService.finalizeReservation({
+    ...data,
+    memberId
+  })
 
   const qrCodeUrl = getQrCodeUrl(reservationCode)
 
-  // 予約完了メール非同期送信
   const seatList = data.tickets.map(t => {
     const info = seatInfoMap.get(t.seatId)
     return `  ${info?.row_label ?? '?'}-${info?.col_no ?? '?'}  ${TICKET_LABELS[t.ticketType]}  ${TICKET_PRICES[t.ticketType].toLocaleString()}円`

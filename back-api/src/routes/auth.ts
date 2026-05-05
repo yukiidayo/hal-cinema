@@ -8,14 +8,10 @@ import { generateOtp, hashOtp } from '../lib/otp.js'
 import { sendOtpEmail } from '../lib/email.js'
 import { createSession, destroySession } from '../middleware/session.js'
 import { checkRateLimit } from '../lib/rateLimit.js'
+import { OTP_CONFIG } from '../shared/constants.js'
 import type mysql from 'mysql2/promise'
 
 export const authRouter = new Hono<AppEnv>()
-
-const OTP_EXPIRES_MIN = 10
-const OTP_RESEND_SEC = 60
-const OTP_MAX_ATTEMPTS = 5
-const OTP_LOCK_MIN = 15
 
 const sendOtpSchema = z.object({
   email: z.string().email().max(254),
@@ -48,7 +44,6 @@ authRouter.post('/auth/otp/send', async (c) => {
   })
   const { email, type } = sendOtpSchema.parse(body)
 
-  // Rate limit: 5 per 10min/IP + 3 per 10min/email
   if (!checkRateLimit(`otp:send:ip:${ip}`, 5, 10 * 60 * 1000)) {
     throw new AppError('OTP_RESEND_COOLDOWN', 'Too many requests from this IP')
   }
@@ -56,7 +51,6 @@ authRouter.post('/auth/otp/send', async (c) => {
     throw new AppError('OTP_RESEND_COOLDOWN', 'Too many OTP requests for this email')
   }
 
-  // Get or create member
   let memberId: number
   const [rows] = await pool.execute<mysql.RowDataPacket[]>(
     'SELECT id FROM members WHERE email = ?',
@@ -72,20 +66,19 @@ authRouter.post('/auth/otp/send', async (c) => {
     memberId = res.insertId
   }
 
-  // Check resend cooldown: latest OTP within 60 seconds
   const [recent] = await pool.execute<mysql.RowDataPacket[]>(
     `SELECT id FROM otp_tokens
      WHERE member_id = ? AND purpose = ? AND created_at > DATE_SUB(NOW(3), INTERVAL ? SECOND)
      LIMIT 1`,
-    [memberId, type, OTP_RESEND_SEC],
+    [memberId, type, OTP_CONFIG.RESEND_SEC],
   )
   if (recent.length > 0) {
-    throw new AppError('OTP_RESEND_COOLDOWN', `Wait ${OTP_RESEND_SEC} seconds before resending`)
+    throw new AppError('OTP_RESEND_COOLDOWN', `Wait ${OTP_CONFIG.RESEND_SEC} seconds before resending`)
   }
 
   const otp = generateOtp()
   const tokenHash = hashOtp(otp)
-  const expiresAt = new Date(Date.now() + OTP_EXPIRES_MIN * 60 * 1000)
+  const expiresAt = new Date(Date.now() + OTP_CONFIG.EXPIRES_MIN * 60 * 1000)
   console.log(`[OTP] email=${email} type=${type} code=${otp}`)
 
   await pool.execute(
@@ -98,7 +91,7 @@ authRouter.post('/auth/otp/send', async (c) => {
 
   return c.json(
     successResponse(
-      { expiresInSec: OTP_EXPIRES_MIN * 60, resendAfterSec: OTP_RESEND_SEC },
+      { expiresInSec: OTP_CONFIG.EXPIRES_MIN * 60, resendAfterSec: OTP_CONFIG.RESEND_SEC },
       requestId,
     ),
     200,
@@ -106,7 +99,7 @@ authRouter.post('/auth/otp/send', async (c) => {
 })
 
 // POST /api/auth/otp/verify
-authRouter.post('/auth/otp/verify', async (c) => {
+authRouter.post('/api/auth/otp/verify', async (c) => {
   const requestId = c.get('requestId')
   const ip = c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip') ?? 'unknown'
 
@@ -115,7 +108,6 @@ authRouter.post('/auth/otp/verify', async (c) => {
   })
   const { email, code, type } = verifyOtpSchema.parse(body)
 
-  // Rate limit: 10 per 10min/IP + 5 per 10min/email
   if (!checkRateLimit(`otp:verify:ip:${ip}`, 10, 10 * 60 * 1000)) {
     throw new AppError('OTP_ATTEMPTS_EXCEEDED', 'Too many verification attempts from this IP')
   }
@@ -123,7 +115,6 @@ authRouter.post('/auth/otp/verify', async (c) => {
     throw new AppError('OTP_ATTEMPTS_EXCEEDED', 'Too many verification attempts for this email')
   }
 
-  // Find member
   const [memberRows] = await pool.execute<mysql.RowDataPacket[]>(
     'SELECT id FROM members WHERE email = ?',
     [email],
@@ -133,7 +124,6 @@ authRouter.post('/auth/otp/verify', async (c) => {
   }
   const memberId = memberRows[0].id as number
 
-  // Find latest valid OTP token
   const [tokenRows] = await pool.execute<mysql.RowDataPacket[]>(
     `SELECT id, token_hash, expires_at, used_at, failed_attempts, locked_until
      FROM otp_tokens
@@ -149,27 +139,23 @@ authRouter.post('/auth/otp/verify', async (c) => {
 
   const token = tokenRows[0]
 
-  // Check lock
   if (token.locked_until && new Date(token.locked_until) > new Date()) {
     throw new AppError('OTP_ATTEMPTS_EXCEEDED', `Account locked until ${token.locked_until}`)
   }
 
-  // Check expiry
   if (new Date(token.expires_at) < new Date()) {
     throw new AppError('OTP_EXPIRED', 'OTP has expired')
   }
 
-  // Check used
   if (token.used_at) {
     throw new AppError('OTP_INVALID', 'OTP already used')
   }
 
-  // Verify hash
   const inputHash = hashOtp(code)
   if (inputHash !== token.token_hash) {
     const newFailedAttempts = (token.failed_attempts as number) + 1
-    if (newFailedAttempts >= OTP_MAX_ATTEMPTS) {
-      const lockUntil = new Date(Date.now() + OTP_LOCK_MIN * 60 * 1000)
+    if (newFailedAttempts >= OTP_CONFIG.MAX_ATTEMPTS) {
+      const lockUntil = new Date(Date.now() + OTP_CONFIG.LOCK_MIN * 60 * 1000)
       await pool.execute(
         'UPDATE otp_tokens SET failed_attempts = ?, locked_until = ? WHERE id = ?',
         [newFailedAttempts, lockUntil, token.id],
@@ -183,10 +169,8 @@ authRouter.post('/auth/otp/verify', async (c) => {
     throw new AppError('OTP_INVALID', 'Invalid OTP')
   }
 
-  // Mark as used
   await pool.execute('UPDATE otp_tokens SET used_at = NOW(3) WHERE id = ?', [token.id])
 
-  // Create session
   createSession(c, { memberId })
 
   return c.json(
