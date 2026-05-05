@@ -2,7 +2,6 @@ type Entry = { timestamps: number[] }
 
 const store = new Map<string, Entry>()
 
-// Cleanup entries older than the window every 5 minutes
 setInterval(() => {
   const now = Date.now()
   for (const [key, entry] of store) {
