@@ -35,6 +35,20 @@ export function usePayment() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!d.scheduleId || !d.selectedSeats || !d.customer || !d.layoutVersion) return
+
+    if (cardNo.replace(/\s/g, "").length !== 16) {
+      setError("カード番号は16桁で入力してください")
+      return
+    }
+    if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+      setError("有効期限は MM/YY の形式で入力してください")
+      return
+    }
+    if (cvv.length !== 3) {
+      setError("セキュリティコードは3桁で入力してください")
+      return
+    }
+
     setError("")
     setSubmitting(true)
     try {
@@ -43,6 +57,7 @@ export function usePayment() {
         {
           method: "POST",
           body: JSON.stringify({
+            reservationCode: d.reservationCode, // 追加
             scheduleId: d.scheduleId,
             layoutVersion: d.layoutVersion,
             seatIds: d.selectedSeats.map(s => s.seatId),

@@ -1,17 +1,14 @@
 import { Link } from "react-router"
 import { Button } from "~/shared/ui/Button"
 import { Input } from "~/shared/ui/Input"
-import { Header } from "~/widgets/Header"
 import { useRegister } from "~/features/auth/useRegister"
 
 export default function RegisterPage() {
   const { email, setEmail, error, loading, redirect, handleSubmit } = useRegister()
 
   return (
-    <>
-      <Header />
-      <main className="mx-auto max-w-md px-4 py-12">
-        <h1 className="mb-2 text-2xl font-bold">新規会員登録</h1>
+    <div className="py-12 max-w-md mx-auto">
+      <h1 className="mb-2 text-2xl font-bold">新規会員登録</h1>
         <p className="mb-6 text-sm text-gray-500">
           メールアドレスを入力してください。認証コードを送信します。
         </p>
@@ -37,7 +34,6 @@ export default function RegisterPage() {
             ログイン
           </Link>
         </p>
-      </main>
-    </>
+    </div>
   )
 }

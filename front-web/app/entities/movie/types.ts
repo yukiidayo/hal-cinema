@@ -5,6 +5,7 @@ export type Movie = {
   durationMin: number
   thumbnailUrl: string | null
   status: "now_showing" | "coming_soon"
+  schedules?: Schedule[]
 }
 
 export type Schedule = {

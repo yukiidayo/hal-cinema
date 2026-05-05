@@ -38,7 +38,7 @@ export function useSchedules() {
   }
 
   function selectSchedule(scheduleId: number) {
-    navigate(`/reservations/tickets/${scheduleId}`)
+    navigate(`/reservations/booking/${movieId}?date=${selectedDate}&scheduleId=${scheduleId}`)
   }
 
   return { data, loading, error, days, selectedDate, setDate, selectSchedule }

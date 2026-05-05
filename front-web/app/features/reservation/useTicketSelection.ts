@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router"
-import { apiFetch, ApiError } from "~/shared/api/client"
-import { draft } from "~/entities/reservation/draft"
+import { useNavigate } from "react-router"
+import { apiFetch } from "~/shared/api/client"
+import { draft, type SelectedSeat } from "~/entities/reservation/draft"
 import {
-  TICKET_TYPES, calcTotalPrice, totalTicketCount,
-  type TicketCounts,
+  TICKET_TYPES, calcTotalPrice, type TicketType
 } from "~/entities/ticket"
 
 type ScheduleInfo = {
@@ -13,50 +12,63 @@ type ScheduleInfo = {
   screenName: string
   startsAt: string
   endsAt: string
-  remainingSeats: number
 }
 
 export function useTicketSelection() {
-  const { scheduleId } = useParams<{ scheduleId: string }>()
   const navigate = useNavigate()
   const [info, setInfo] = useState<ScheduleInfo | null>(null)
   const [loading, setLoading] = useState(true)
-  const [counts, setCounts] = useState<TicketCounts>({ general: 0, university: 0, highschool: 0, child: 0 })
+  const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([])
   const [totalPrice, setTotalPrice] = useState(0)
   const [quoting, setQuoting] = useState(false)
 
-  const total = totalTicketCount(counts)
-
   useEffect(() => {
-    if (!scheduleId) return
-    apiFetch<ScheduleInfo>(`/schedules/${scheduleId}`)
+    const d = draft.get()
+    if (!d.scheduleId || !d.selectedSeats || d.selectedSeats.length === 0) {
+      navigate("/movies", { replace: true })
+      return
+    }
+
+    setSelectedSeats(d.selectedSeats)
+
+    apiFetch<ScheduleInfo>(`/schedules/${d.scheduleId}`)
       .then(setInfo)
-      .catch(err => {
-        if (err instanceof ApiError && err.status === 404) navigate("/movies", { replace: true })
-      })
       .finally(() => setLoading(false))
-  }, [scheduleId])
+  }, [])
 
   useEffect(() => {
-    if (!scheduleId || total === 0) { setTotalPrice(calcTotalPrice(counts)); return }
+    const d = draft.get()
+    if (!d.scheduleId || selectedSeats.length === 0) return
+
+    // チケット枚数を集計
+    const counts = { general: 0, university: 0, highschool: 0, child: 0 }
+    selectedSeats.forEach(s => {
+      counts[s.ticketType as keyof typeof counts]++
+    })
+
     setQuoting(true)
-    apiFetch<{ ticketCount: number; totalPrice: number }>("/reservations/quote", {
+    apiFetch<{ totalPrice: number }>("/reservations/quote", {
       method: "POST",
-      body: JSON.stringify({ scheduleId: Number(scheduleId), ticketCounts: counts }),
+      body: JSON.stringify({ scheduleId: d.scheduleId, ticketCounts: counts }),
     })
       .then(d => setTotalPrice(d.totalPrice))
       .catch(() => setTotalPrice(calcTotalPrice(counts)))
       .finally(() => setQuoting(false))
-  }, [counts, scheduleId])
+  }, [selectedSeats])
 
-  function changeCount(type: (typeof TICKET_TYPES)[number], delta: number) {
-    setCounts(prev => ({ ...prev, [type]: Math.max(0, prev[type] + delta) }))
+  function updateSeatTicketType(seatId: number, type: TicketType) {
+    setSelectedSeats(prev => prev.map(s => s.seatId === seatId ? { ...s, ticketType: type } : s))
   }
 
   function handleNext() {
-    draft.set({ scheduleId: Number(scheduleId), ticketCounts: counts })
-    navigate(`/reservations/seats/${scheduleId}`)
+    const counts = { general: 0, university: 0, highschool: 0, child: 0 }
+    selectedSeats.forEach(s => {
+      counts[s.ticketType as keyof typeof counts]++
+    })
+    
+    draft.set({ selectedSeats, ticketCounts: counts })
+    navigate("/reservations/confirm")
   }
 
-  return { info, loading, counts, totalPrice, quoting, total, changeCount, handleNext }
+  return { info, loading, selectedSeats, totalPrice, quoting, updateSeatTicketType, handleNext }
 }

@@ -13,7 +13,7 @@ export async function getAuthState(): Promise<AuthState> {
 }
 
 export function safeRedirect(redirect: string | null | undefined): string {
-  if (!redirect) return "/reservations/customer"
+  if (!redirect) return "/"
   if (redirect.startsWith("/") && !redirect.startsWith("//")) return redirect
-  return "/reservations/customer"
+  return "/"
 }

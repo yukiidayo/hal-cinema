@@ -9,6 +9,8 @@ export type SelectedSeat = {
 
 export type ReservationDraft = {
   scheduleId?: number
+  reservationCode?: string
+  expiresAt?: string
   ticketCounts?: TicketCounts
   selectedSeats?: SelectedSeat[]
   layoutVersion?: number

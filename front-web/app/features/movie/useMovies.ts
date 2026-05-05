@@ -8,6 +8,7 @@ export function useMovies() {
   const [searchParams, setSearchParams] = useSearchParams()
   const selectedDate = searchParams.get("date") ?? ""
   const selectedStatus = (searchParams.get("status") ?? "") as "" | "now_showing" | "coming_soon"
+  const sortBy = (searchParams.get("sort") ?? "newest") as "newest" | "title" | "duration"
 
   const [movies, setMovies] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,10 +23,18 @@ export function useMovies() {
     if (selectedStatus) params.set("status", selectedStatus)
     const qs = params.toString()
     apiFetch<{ items: Movie[] }>(`/movies${qs ? `?${qs}` : ""}`)
-      .then(d => setMovies(d.items))
+      .then(d => {
+        let sorted = [...d.items]
+        if (sortBy === "title") {
+          sorted.sort((a, b) => a.title.localeCompare(b.title, "ja"))
+        } else if (sortBy === "duration") {
+          sorted.sort((a, b) => b.durationMin - a.durationMin)
+        }
+        setMovies(sorted)
+      })
       .catch(err => setError(err instanceof ApiError ? err.message : "読み込みに失敗しました"))
       .finally(() => setLoading(false))
-  }, [selectedDate, selectedStatus])
+  }, [selectedDate, selectedStatus, sortBy])
 
   function setDate(date: string) {
     setSearchParams(prev => {
@@ -43,5 +52,13 @@ export function useMovies() {
     })
   }
 
-  return { movies, loading, error, days, selectedDate, selectedStatus, setDate, setStatus }
+  function setSort(sort: string) {
+    setSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      if (sort && sort !== "newest") p.set("sort", sort); else p.delete("sort")
+      return p
+    })
+  }
+
+  return { movies, loading, error, days, selectedDate, selectedStatus, sortBy, setDate, setStatus, setSort }
 }

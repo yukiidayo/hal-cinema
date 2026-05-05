@@ -1,64 +1,81 @@
-import { Header } from "~/widgets/Header"
-import { Button } from "~/shared/ui/Button"
-import { TICKET_TYPES, TICKET_LABELS, TICKET_PRICES, formatJst } from "~/entities/ticket"
-import { useTicketSelection } from "~/features/reservation/useTicketSelection"
+import {Header} from "~/widgets/Header"
+import {Button} from "~/shared/ui/Button"
+import {TICKET_TYPES, TICKET_LABELS, TICKET_PRICES, formatJst} from "~/entities/ticket"
+import {useTicketSelection} from "~/features/reservation/useTicketSelection"
 
 export default function TicketsPage() {
-  const { info, loading, counts, totalPrice, quoting, total, changeCount, handleNext } = useTicketSelection()
+    const {info, loading, selectedSeats, totalPrice, quoting, updateSeatTicketType, handleNext} = useTicketSelection()
 
-  if (loading) {
+    if (loading) {
+        return (
+            <>
+                <Header/>
+                <main className="mx-auto max-w-xl px-4 py-8"><p className="text-gray-500">読み込み中...</p></main>
+            </>
+        )
+    }
+
     return (
-      <>
-        <Header />
-        <main className="mx-auto max-w-xl px-4 py-8"><p className="text-gray-500">読み込み中...</p></main>
-      </>
-    )
-  }
+        <div className="py-6">
+            <p className="mb-4 text-xs text-gray-400">日付・時間・座席 → お客様情報 → 券種選択 → 確認 → 決済</p>
 
-  return (
-    <>
-      <Header />
-      <main className="mx-auto max-w-xl px-4 py-6">
-        <p className="mb-4 text-xs text-gray-400">チケット選択 → 座席選択 → お客様情報 → 確認 → 決済</p>
+            {info && (
+                <div className="mb-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <p className="text-2xl font-black text-gray-900">{info.movieTitle}</p>
+                    <div className="mt-2 flex items-center gap-3 text-sm font-bold text-gray-500">
+                        <span className="rounded-md bg-gray-100 px-2 py-1">{formatJst(info.startsAt)} 〜</span>
+                        <span>{info.screenName}</span>
+                    </div>
+                </div>
+            )}
 
-        {info && (
-          <div className="mb-6 rounded-lg border border-gray-200 p-4 text-sm">
-            <p className="font-bold text-lg">{info.movieTitle}</p>
-            <p className="mt-1 text-gray-600">{formatJst(info.startsAt)} 〜 {info.screenName}</p>
-            <p className="mt-0.5 text-gray-500">残{info.remainingSeats}席</p>
-          </div>
-        )}
+            <h2 className="mb-4 text-lg font-black text-gray-900">券種を選ぶ</h2>
 
-        <h2 className="mb-3 text-lg font-bold">券種と枚数を選ぶ</h2>
-        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
-          {TICKET_TYPES.map(type => (
-            <div key={type} className="flex items-center justify-between px-4 py-3">
-              <div>
-                <p className="font-medium">{TICKET_LABELS[type]}</p>
-                <p className="text-sm text-gray-500">{TICKET_PRICES[type].toLocaleString()}円</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <button onClick={() => changeCount(type, -1)} disabled={counts[type] === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30">−</button>
-                <span className="w-4 text-center font-medium">{counts[type]}</span>
-                <button onClick={() => changeCount(type, 1)} disabled={total >= 8}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-lg disabled:opacity-30">＋</button>
-              </div>
+            <div className="flex flex-col gap-4">
+                {selectedSeats.map(seat => (
+                    <div key={seat.seatId}
+                         className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-4">
+                            <div
+                                className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-900 text-xs font-black text-white">
+                                {seat.row}-{seat.col}
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase">座席</p>
+                                <p className="text-sm font-black text-gray-900">選択済み</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-1 gap-2 sm:max-w-xs">
+                            {TICKET_TYPES.map(type => (
+                                <button
+                                    key={type}
+                                    onClick={() => updateSeatTicketType(seat.seatId, type)}
+                                    className={`flex-1 rounded-lg border-2 py-2 text-[10px] font-black transition-all ${
+                                        seat.ticketType === type
+                                            ? "border-red-600 bg-red-50 text-red-700"
+                                            : "border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200"
+                                    }`}
+                                >
+                                    {TICKET_LABELS[type]}
+                                    <br/>
+                                    {TICKET_PRICES[type].toLocaleString()}円
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
-          ))}
+
+            <div className="mt-10 flex items-center justify-between border-t border-gray-100 pt-8">
+                <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase">合計金額</p>
+                    <p className="text-3xl font-black text-gray-900">{quoting ? "..." : `${totalPrice.toLocaleString()}円`}</p>
+                </div>
+                <Button size="lg" className="px-12 h-14 text-lg font-black" onClick={handleNext}>
+                    次へ（内容を確認）
+                </Button>
+            </div>
         </div>
-
-        {total > 8 && <p className="mt-2 text-sm text-red-600">合計枚数は8枚までです。</p>}
-
-        <div className="mt-4 flex justify-between text-lg font-bold">
-          <span>合計（{total}枚）</span>
-          <span>{quoting ? "..." : `${totalPrice.toLocaleString()}円`}</span>
-        </div>
-
-        <Button size="lg" className="mt-6" disabled={total === 0 || total > 8} onClick={handleNext}>
-          次へ（座席を選ぶ）
-        </Button>
-      </main>
-    </>
-  )
+    )
 }
