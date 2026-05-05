@@ -15,6 +15,7 @@ export function useBooking() {
     setSelectedScheduleId,
     loading,
     error: selectionError,
+    retryLoadSchedules,
   } = useScheduleSelection()
 
   const {
@@ -25,6 +26,7 @@ export function useBooking() {
     error: mapError,
     toastMsg,
     showToast,
+    retryLoadSeatMap,
   } = useSeatMap(selectedScheduleId)
 
   const { handleNext } = useHoldSeat({
@@ -35,6 +37,13 @@ export function useBooking() {
   })
 
   const error = selectionError || mapError
+
+  function retryLoad() {
+    retryLoadSchedules()
+    if (selectedScheduleId) {
+      retryLoadSeatMap()
+    }
+  }
 
   return {
     movie,
@@ -52,5 +61,6 @@ export function useBooking() {
     error,
     toastMsg,
     handleNext,
+    retryLoad,
   }
 }

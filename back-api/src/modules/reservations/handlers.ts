@@ -50,6 +50,14 @@ export const getSeats = async (c: Context<AppEnv>) => {
 
 export const holdSeats = async (c: Context<AppEnv>) => {
   const requestId = c.get('requestId')
+  const session = c.get('session')
+  const ip = c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip') ?? 'unknown'
+
+  const rlKey = session ? `hold:member:${session.memberId}` : `hold:ip:${ip}`
+  if (!checkRateLimit(rlKey, 10, 60 * 1000)) {
+    throw new AppError('RESERVATION_LIMIT_EXCEEDED', 'Too many seat hold attempts')
+  }
+
   const body = await c.req.json().catch(() => { throw new AppError('VALIDATION_ERROR', 'Invalid JSON') })
 
   const { scheduleId, seatIds } = z.object({
@@ -91,6 +99,14 @@ export const createReservation = async (c: Context<AppEnv>) => {
   if (new Set(data.seatIds).size !== data.seatIds.length) {
     throw new AppError('VALIDATION_ERROR', 'Duplicate seat IDs')
   }
+  const ticketSeatIds = data.tickets.map(t => t.seatId)
+  if (new Set(ticketSeatIds).size !== ticketSeatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'Duplicate ticket seat IDs')
+  }
+  const requestedSeatIds = new Set(data.seatIds)
+  if (requestedSeatIds.size !== ticketSeatIds.length || ticketSeatIds.some(seatId => !requestedSeatIds.has(seatId))) {
+    throw new AppError('VALIDATION_ERROR', 'seatIds and tickets.seatId must match exactly')
+  }
 
   let memberId: number | null = null
   if (data.bookingType === 'member') {
@@ -105,8 +121,12 @@ export const createReservation = async (c: Context<AppEnv>) => {
   const seatInfoMap = await ReservationService.getSeatsInScreen(data.seatIds, sched.screen_id)
 
   const { reservationId, reservationCode, totalPrice } = await ReservationService.finalizeReservation({
-    ...data,
+    reservationCode: data.reservationCode,
+    scheduleId: data.scheduleId,
     memberId,
+    bookingType: data.bookingType,
+    customer: data.customer,
+    tickets: data.tickets,
   })
 
   const qrCodeUrl = getQrCodeUrl(reservationCode)

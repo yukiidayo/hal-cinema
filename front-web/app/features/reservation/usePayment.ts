@@ -1,13 +1,46 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router"
 import { apiFetch, ApiError } from "~/shared/api/client"
-import { draft } from "~/entities/reservation/draft"
+import { draft, type ReservationDraft } from "~/entities/reservation/draft"
 import { TICKET_PRICES } from "~/entities/ticket"
 
 type ScheduleInfo = {
   movieTitle: string
   screenName: string
   startsAt: string
+}
+
+type CompletePaymentDraft = ReservationDraft & {
+  scheduleId: number
+  reservationCode: string
+  layoutVersion: number
+  selectedSeats: NonNullable<ReservationDraft["selectedSeats"]>
+  customer: NonNullable<ReservationDraft["customer"]>
+}
+
+function resolvePaymentDraftIssue(d: ReservationDraft): { message: string; redirectTo: string } | null {
+  if (!d.selectedSeats || d.selectedSeats.length === 0 || !d.scheduleId) {
+    return { message: "座席情報が不足しています。上映回選択からやり直してください。", redirectTo: "/movies" }
+  }
+  if (!d.customer?.name || !d.customer?.email) {
+    return { message: "お客様情報が不足しています。入力画面へ戻ります。", redirectTo: "/reservations/customer" }
+  }
+  if (!d.layoutVersion || !d.reservationCode) {
+    return { message: "座席の仮押さえ情報が不足しています。座席選択からやり直してください。", redirectTo: "/movies" }
+  }
+  return null
+}
+
+function isCompletePaymentDraft(d: ReservationDraft): d is CompletePaymentDraft {
+  return (
+    typeof d.scheduleId === "number" &&
+    typeof d.reservationCode === "string" &&
+    typeof d.layoutVersion === "number" &&
+    Array.isArray(d.selectedSeats) &&
+    d.selectedSeats.length > 0 &&
+    !!d.customer?.name &&
+    !!d.customer?.email
+  )
 }
 
 export function usePayment() {
@@ -19,22 +52,36 @@ export function usePayment() {
   const [cvv, setCvv] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
+  const [recoverPath, setRecoverPath] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!d.customer?.name || !d.customer?.email) {
-      navigate("/movies", { replace: true })
+    const issue = resolvePaymentDraftIssue(d)
+    if (issue) {
+      setError(issue.message)
+      setRecoverPath(issue.redirectTo)
       return
     }
-    if (d.scheduleId) {
-      apiFetch<ScheduleInfo>(`/schedules/${d.scheduleId}`).then(setSchedInfo).catch(() => {})
-    }
-  }, [])
+    setRecoverPath(null)
+
+    apiFetch<ScheduleInfo>(`/schedules/${d.scheduleId}`)
+      .then(setSchedInfo)
+      .catch(() => setError("上映情報の取得に失敗しました。もう一度お試しください。"))
+  }, [navigate])
 
   const totalPrice = d.selectedSeats?.reduce((sum, s) => sum + TICKET_PRICES[s.ticketType], 0) ?? 0
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!d.scheduleId || !d.selectedSeats || !d.customer || !d.layoutVersion) return
+
+    if (!isCompletePaymentDraft(d)) {
+      const issue = resolvePaymentDraftIssue(d) ?? {
+        message: "予約情報が不足しています。最初からやり直してください。",
+        redirectTo: "/movies",
+      }
+      setError(issue.message)
+      setRecoverPath(issue.redirectTo)
+      return
+    }
 
     if (cardNo.replace(/\s/g, "").length !== 16) {
       setError("カード番号は16桁で入力してください")
@@ -57,7 +104,7 @@ export function usePayment() {
         {
           method: "POST",
           body: JSON.stringify({
-            reservationCode: d.reservationCode, // 追加
+            reservationCode: d.reservationCode,
             scheduleId: d.scheduleId,
             layoutVersion: d.layoutVersion,
             seatIds: d.selectedSeats.map(s => s.seatId),
@@ -87,5 +134,24 @@ export function usePayment() {
     }
   }
 
-  return { schedInfo, cardNo, setCardNo, expiry, setExpiry, cvv, setCvv, submitting, error, totalPrice, handleSubmit }
+  function goRecover() {
+    if (!recoverPath) return
+    navigate(recoverPath, { replace: true })
+  }
+
+  return {
+    schedInfo,
+    cardNo,
+    setCardNo,
+    expiry,
+    setExpiry,
+    cvv,
+    setCvv,
+    submitting,
+    error,
+    recoverPath,
+    goRecover,
+    totalPrice,
+    handleSubmit,
+  }
 }

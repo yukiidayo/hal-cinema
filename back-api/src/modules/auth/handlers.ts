@@ -45,6 +45,14 @@ export const sendOtp = async (c: Context<AppEnv>) => {
   await AuthService.checkOtpCooldown(memberId, type)
   const otp = await AuthService.issueOtp(memberId, type)
 
+  /*
+   * =====================================================================
+   * ⚠⚠⚠ DEVELOPMENT DEBUG LOG (INTENTIONAL) ⚠⚠⚠
+   * このログはローカル開発でOTP動作を確認するために意図的に残している。
+   * 本番環境では運用ログ基盤/出力設定で必ず無効化し、外部に露出させないこと。
+   * セキュリティ観点でOTPの平文出力は危険なため、運用時は厳格に管理する。
+   * =====================================================================
+   */
   console.log(`[OTP] email=${email} type=${type} code=${otp}`)
   await sendOtpEmail(email, otp)
 

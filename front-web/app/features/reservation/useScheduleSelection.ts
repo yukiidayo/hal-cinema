@@ -16,6 +16,7 @@ export function useScheduleSelection() {
   
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [reloadKey, setReloadKey] = useState(0)
 
   const days = getNext7Days()
 
@@ -27,7 +28,7 @@ export function useScheduleSelection() {
       .then(setMovie)
       .catch(() => setError("映画情報が見つかりません"))
       .finally(() => setLoading(false))
-  }, [movieId])
+  }, [movieId, reloadKey])
 
   // 日付が空だがスケジュールIDがある場合、スケジュール情報から日付を補完する
   useEffect(() => {
@@ -43,19 +44,30 @@ export function useScheduleSelection() {
           }, { replace: true })
         })
     }
-  }, [selectedDate, selectedScheduleId, setSearchParams])
+  }, [selectedDate, selectedScheduleId, setSearchParams, reloadKey])
 
   // 日付が選択されたらスケジュールを取得
   useEffect(() => {
     if (!movieId || !selectedDate) {
       setSchedules([])
+      setError("")
       return
     }
+    setSchedules([])
+    setError("")
     apiFetch<{ schedules: Schedule[] }>(`/movies/${movieId}/schedules?date=${selectedDate}`)
       .then(d => {
         setSchedules(d.schedules)
       })
-  }, [movieId, selectedDate])
+      .catch(() => {
+        setSchedules([])
+        setError("上映スケジュールの取得に失敗しました")
+      })
+  }, [movieId, selectedDate, reloadKey])
+
+  function retryLoadSchedules() {
+    setReloadKey(prev => prev + 1)
+  }
 
   function setSelectedDate(date: string) {
     setSearchParams(prev => {
@@ -84,5 +96,6 @@ export function useScheduleSelection() {
     setSelectedScheduleId,
     loading,
     error,
+    retryLoadSchedules,
   }
 }

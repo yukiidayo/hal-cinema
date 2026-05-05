@@ -14,6 +14,8 @@ export default function PaymentPage() {
         setCvv,
         submitting,
         error,
+        recoverPath,
+        goRecover,
         totalPrice,
         handleSubmit
     } = usePayment()
@@ -47,6 +49,11 @@ export default function PaymentPage() {
                 </div>
                 <p className="text-xs text-gray-400">※このシステムはデモです。カード情報は送信されません。</p>
                 {error && <p className="text-sm text-red-600">{error}</p>}
+                {recoverPath && (
+                    <Button type="button" variant="ghost" onClick={goRecover}>
+                        入力画面へ戻る
+                    </Button>
+                )}
                 <Button type="submit" size="lg" disabled={submitting}>
                     {submitting ? "処理中..." : "予約を確定する"}
                 </Button>

@@ -32,6 +32,29 @@ export type ReservationForCancel = {
   startsAt: Date | string
 }
 
+async function validateSeatsForSchedule(
+  scheduleId: number,
+  seatIds: number[],
+): Promise<void> {
+  const [scheduleRows] = await pool.execute<mysql.RowDataPacket[]>(
+    'SELECT screen_id FROM schedules WHERE id = ? AND is_public = 1',
+    [scheduleId],
+  )
+  if (scheduleRows.length === 0) {
+    throw new AppError('NOT_FOUND', 'Schedule not found')
+  }
+  const screenId = scheduleRows[0].screen_id as number
+
+  const placeholders = seatIds.map(() => '?').join(',')
+  const [seatRows] = await pool.execute<mysql.RowDataPacket[]>(
+    `SELECT id FROM seats WHERE screen_id = ? AND id IN (${placeholders})`,
+    [screenId, ...seatIds],
+  )
+  if (seatRows.length !== seatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'One or more invalid seat IDs')
+  }
+}
+
 export async function getSeatsForSchedule(scheduleId: number): Promise<{ layout: SeatLayout; seats: SeatInfo[] }> {
   const [schedRows] = await pool.execute<mysql.RowDataPacket[]>(
     'SELECT screen_id FROM schedules WHERE id = ? AND is_public = 1',
@@ -51,13 +74,13 @@ export async function getSeatsForSchedule(scheduleId: number): Promise<{ layout:
   const [seatRows] = await pool.execute<mysql.RowDataPacket[]>(
     `SELECT
        s.id as seat_id, s.row_label, s.col_no,
-       s.position_top_pct, s.position_left_pct,
-       s.seat_width_pct, s.seat_height_pct, s.hit_radius_pct,
-       CASE
-         WHEN rs.id IS NOT NULL THEN 'reserved'
-         ELSE 'available'
-       END as status
-     FROM seats s
+        s.position_top_pct, s.position_left_pct,
+        s.seat_width_pct, s.seat_height_pct, s.hit_radius_pct,
+        CASE
+          WHEN r.id IS NOT NULL THEN 'reserved'
+          ELSE 'available'
+        END as status
+      FROM seats s
      LEFT JOIN reservation_seats rs ON rs.schedule_id = ? AND rs.seat_id = s.id
      LEFT JOIN reservations r ON r.id = rs.reservation_id
      AND (r.status = 'confirmed' OR (r.status = 'pending' AND r.expires_at > CURRENT_TIMESTAMP(3)))
@@ -119,6 +142,7 @@ export async function getReservationDetail(code: string) {
   return {
     reservationCode: r.reservation_code as string,
     status: r.status as string,
+    bookingType: r.booking_type as 'member' | 'guest',
     canCancel,
     movie: { title: r.movie_title as string, thumbnailUrl: r.thumbnail_url as string | null },
     schedule: { startsAt: r.starts_at, endsAt: r.ends_at, screenName: r.screen_name as string },
@@ -186,6 +210,8 @@ export async function holdSeats(
   scheduleId: number,
   seatIds: number[],
 ): Promise<{ reservationCode: string; expiresAt: Date }> {
+  await validateSeatsForSchedule(scheduleId, seatIds)
+
   let reservationCode = ''
   for (let i = 0; i < 5; i++) {
     const candidate = generateReservationCode()
@@ -255,9 +281,12 @@ export async function finalizeReservation(params: {
   bookingType: 'member' | 'guest'
   customer: { name: string; email: string }
   tickets: { seatId: number; ticketType: TicketType }[]
-  seatIds: number[]
 }): Promise<{ reservationId: number; reservationCode: string; totalPrice: number }> {
-  const { reservationCode, scheduleId, memberId, bookingType, customer, tickets, seatIds } = params
+  const { reservationCode, scheduleId, memberId, bookingType, customer, tickets } = params
+  const seatIds = tickets.map(t => t.seatId)
+  if (new Set(seatIds).size !== seatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'Duplicate ticket seat IDs')
+  }
   const totalPrice = tickets.reduce((sum, t) => sum + TICKET_PRICES[t.ticketType], 0)
   const placeholders = seatIds.map(() => '?').join(',')
 

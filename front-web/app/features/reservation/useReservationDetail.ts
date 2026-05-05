@@ -7,6 +7,7 @@ type Seat = { row: string; col: number; ticketType: string; price: number }
 export type ReservationDetail = {
   reservationCode: string
   status: string
+  bookingType: "member" | "guest"
   canCancel: boolean
   movie: { title: string; thumbnailUrl: string | null }
   schedule: { startsAt: string; endsAt: string; screenName: string }
@@ -37,11 +38,15 @@ export function useReservationDetail() {
 
   async function handleCancel() {
     if (!detail) return
+    if (detail.bookingType === "guest" && !cancelEmail.trim()) {
+      setCancelError("ゲスト予約のキャンセルにはメールアドレス入力が必要です。")
+      return
+    }
     setCancelError("")
     setCancelling(true)
     try {
-      const body = detail.status === "confirmed" && cancelEmail
-        ? JSON.stringify({ email: cancelEmail })
+      const body = detail.bookingType === "guest"
+        ? JSON.stringify({ email: cancelEmail.trim() })
         : undefined
       await apiFetch(`/reservations/${detail.reservationCode}/cancel`, {
         method: "POST",

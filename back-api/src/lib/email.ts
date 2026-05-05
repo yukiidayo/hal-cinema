@@ -10,6 +10,14 @@ function getResend(): Resend {
 
 export async function sendOtpEmail(to: string, code: string): Promise<void> {
   if (!process.env.RESEND_API_KEY) {
+    /*
+     * =====================================================================
+     * ⚠⚠⚠ DEVELOPMENT DEBUG LOG (INTENTIONAL) ⚠⚠⚠
+     * ローカル開発でメール配信基盤なしでもOTP確認できるように明示的に出力している。
+     * 本番運用では RESEND_API_KEY を必ず設定し、この分岐に入らないことが前提。
+     * もし本番相当環境でこのログが出る場合は設定不備として即時対処すること。
+     * =====================================================================
+     */
     console.log(`[DEV] OTP for ${to}: ${code}`)
     return
   }

@@ -16,30 +16,78 @@ export class ApiError extends Error {
   }
 }
 
+function isApiErrorBody(value: unknown): value is ApiErrorBody {
+  if (!value || typeof value !== "object") return false
+  const record = value as Record<string, unknown>
+  const error = record.error as Record<string, unknown> | undefined
+  return !!error && typeof error.code === "string" && typeof error.message === "string"
+}
+
+function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
+  if (!value || typeof value !== "object") return false
+  return "data" in (value as Record<string, unknown>)
+}
+
 export async function apiFetch<T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> {
+  const defaultHeaders: Record<string, string> = {}
+  if (options?.body !== undefined) {
+    defaultHeaders["Content-Type"] = "application/json"
+  }
+
   const res = await fetch(`/api${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...defaultHeaders,
       ...options?.headers,
     },
     credentials: "include",
   })
 
-  const json = (await res.json()) as ApiResponse<T> | ApiErrorBody
+  const contentType = res.headers.get("content-type") ?? ""
+  let payload: unknown = null
+  if (contentType.includes("application/json")) {
+    try {
+      payload = await res.json()
+    } catch {
+      payload = null
+    }
+  } else if (res.status !== 204) {
+    try {
+      payload = await res.text()
+    } catch {
+      payload = null
+    }
+  }
 
   if (!res.ok) {
-    const body = json as ApiErrorBody
+    if (isApiErrorBody(payload)) {
+      throw new ApiError(
+        payload.error.code,
+        payload.error.message,
+        payload.error.details,
+        res.status,
+      )
+    }
+    const fallbackMessage =
+      typeof payload === "string" && payload.trim().length > 0
+        ? payload
+        : `Request failed with status ${res.status}`
     throw new ApiError(
-      body.error.code,
-      body.error.message,
-      body.error.details,
+      "HTTP_ERROR",
+      fallbackMessage,
+      payload,
       res.status,
     )
   }
 
-  return (json as ApiResponse<T>).data
+  if (res.status === 204) {
+    return undefined as T
+  }
+  if (isApiResponse<T>(payload)) {
+    return payload.data
+  }
+  throw new ApiError("INVALID_RESPONSE", "Unexpected API response format", payload, res.status)
 }

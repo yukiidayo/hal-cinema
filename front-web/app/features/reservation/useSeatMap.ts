@@ -27,19 +27,34 @@ export function useSeatMap(selectedScheduleId: number | null) {
   const [mapLoading, setMapLoading] = useState(false)
   const [error, setError] = useState("")
   const [toastMsg, setToastMsg] = useState("")
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     if (!selectedScheduleId) {
       setMapData(null)
       setSelectedSeatIds([])
+      setError("")
       return
     }
+
     setMapLoading(true)
+    setError("")
     apiFetch<SeatMapData>(`/reservations/schedules/${selectedScheduleId}/seats`)
-      .then(setMapData)
-      .catch(() => setError("座席情報の取得に失敗しました"))
+      .then(data => {
+        setMapData(data)
+        setError("")
+      })
+      .catch(() => {
+        setMapData(null)
+        setSelectedSeatIds([])
+        setError("座席情報の取得に失敗しました")
+      })
       .finally(() => setMapLoading(false))
-  }, [selectedScheduleId])
+  }, [selectedScheduleId, reloadKey])
+
+  function retryLoadSeatMap() {
+    setReloadKey(prev => prev + 1)
+  }
 
   function showToast(msg: string) {
     setToastMsg(msg)
@@ -67,5 +82,6 @@ export function useSeatMap(selectedScheduleId: number | null) {
     error,
     toastMsg,
     showToast,
+    retryLoadSeatMap,
   }
 }

@@ -8,11 +8,18 @@ export default function BookingPage() {
         movie, days, selectedDate, setSelectedDate,
         schedules, selectedScheduleId, setSelectedScheduleId,
         mapData, mapLoading, selectedSeatIds, toggleSeat,
-        loading, error, toastMsg, handleNext
+        loading, error, toastMsg, handleNext, retryLoad
     } = useBooking()
 
     if (loading) return <div className="py-20 text-center text-gray-500">読み込み中...</div>
-    if (error) return <div className="py-20 text-center text-red-600 font-bold">{error}</div>
+    if (error) {
+        return (
+            <div className="py-20 text-center">
+                <p className="font-bold text-red-600">{error}</p>
+                <Button className="mt-6" onClick={retryLoad}>再試行</Button>
+            </div>
+        )
+    }
 
     return (
         <div className="py-6">

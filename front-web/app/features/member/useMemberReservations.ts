@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { apiFetch } from "~/shared/api/client"
+import { useNavigate } from "react-router"
+import { apiFetch, ApiError } from "~/shared/api/client"
 
 export type MemberReservation = {
   reservationCode: string
@@ -14,6 +15,7 @@ export type MemberReservation = {
 }
 
 export function useMemberReservations() {
+  const navigate = useNavigate()
   const [reservations, setReservations] = useState<MemberReservation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -21,9 +23,15 @@ export function useMemberReservations() {
   useEffect(() => {
     apiFetch<{ items: MemberReservation[] }>("/members/reservations")
       .then(data => setReservations(data.items))
-      .catch(() => setError("予約情報の取得に失敗しました"))
+      .catch(err => {
+        if (err instanceof ApiError && err.status === 401) {
+          navigate("/login?redirect=/member/reservations", { replace: true })
+          return
+        }
+        setError("予約情報の取得に失敗しました")
+      })
       .finally(() => setLoading(false))
-  }, [])
+  }, [navigate])
 
   return { reservations, loading, error }
 }
