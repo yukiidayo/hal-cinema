@@ -1,10 +1,8 @@
 import { Hono } from 'hono'
 import type { AppEnv } from '../types.js'
-import { pool } from '../db/client.js'
 import { AppError } from '../lib/errors.js'
 import { successResponse } from '../lib/response.js'
 import { MovieService } from '../services/movieService.js'
-import type mysql from 'mysql2/promise'
 
 export const moviesRouter = new Hono<AppEnv>()
 
@@ -23,23 +21,7 @@ moviesRouter.get('/movies', async (c) => {
     throw new AppError('VALIDATION_ERROR', 'Invalid status value')
   }
 
-  let sql = `SELECT id, title, description, duration_min, thumbnail_url, status FROM movies WHERE 1=1`
-  const params: (string | number)[] = []
-
-  if (status) {
-    sql += ' AND status = ?'
-    params.push(status)
-  }
-  if (date) {
-    sql += ` AND id IN (
-      SELECT DISTINCT movie_id FROM schedules
-      WHERE is_public = 1 AND DATE(CONVERT_TZ(starts_at, '+00:00', '+09:00')) = ?
-    )`
-    params.push(date)
-  }
-  sql += ' ORDER BY created_at DESC'
-
-  const [movieRows] = await pool.execute<mysql.RowDataPacket[]>(sql, params)
+  const movieRows = await MovieService.getMovies(status, date)
 
   const items = await Promise.all(movieRows.map(async (r) => {
     const schedules = date ? await MovieService.getSchedulesByMovieId(r.id, date) : []

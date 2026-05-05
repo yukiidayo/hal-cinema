@@ -99,7 +99,7 @@ authRouter.post('/auth/otp/send', async (c) => {
 })
 
 // POST /api/auth/otp/verify
-authRouter.post('/api/auth/otp/verify', async (c) => {
+authRouter.post('/auth/otp/verify', async (c) => {
   const requestId = c.get('requestId')
   const ip = c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip') ?? 'unknown'
 

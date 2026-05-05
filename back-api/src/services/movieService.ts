@@ -18,6 +18,19 @@ export type ScheduleRow = {
   remaining_seats: number
 }
 
+export type FullScheduleRow = {
+  schedule_id: number
+  movie_id: number
+  movie_title: string
+  thumbnail_url: string | null
+  duration_min: number
+  screen_name: string
+  screen_id: number
+  starts_at: Date | string
+  ends_at: Date | string
+  remaining_seats: number
+}
+
 export class MovieService {
   static async getMovieById(movieId: number): Promise<MovieRow | null> {
     const [rows] = await pool.execute<mysql.RowDataPacket[]>(
@@ -55,7 +68,7 @@ export class MovieService {
     return rows as ScheduleRow[]
   }
 
-  static async getFullScheduleById(scheduleId: number): Promise<any | null> {
+  static async getFullScheduleById(scheduleId: number): Promise<FullScheduleRow | null> {
     const [rows] = await pool.execute<mysql.RowDataPacket[]>(
       `SELECT
          sch.id as schedule_id,
@@ -79,6 +92,27 @@ export class MovieService {
        WHERE sch.id = ? AND sch.is_public = 1`,
       [scheduleId],
     )
-    return rows[0] || null
+    return (rows[0] as FullScheduleRow) || null
+  }
+
+  static async getMovies(status?: string, date?: string): Promise<MovieRow[]> {
+    let sql = `SELECT id, title, description, duration_min, thumbnail_url, status FROM movies WHERE 1=1`
+    const params: (string | number)[] = []
+
+    if (status) {
+      sql += ' AND status = ?'
+      params.push(status)
+    }
+    if (date) {
+      sql += ` AND id IN (
+        SELECT DISTINCT movie_id FROM schedules
+        WHERE is_public = 1 AND DATE(CONVERT_TZ(starts_at, '+00:00', '+09:00')) = ?
+      )`
+      params.push(date)
+    }
+    sql += ' ORDER BY created_at DESC'
+
+    const [rows] = await pool.execute<mysql.RowDataPacket[]>(sql, params)
+    return rows as MovieRow[]
   }
 }

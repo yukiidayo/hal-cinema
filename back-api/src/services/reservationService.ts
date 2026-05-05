@@ -2,7 +2,7 @@ import type mysql from 'mysql2/promise'
 import { pool } from '../db/client.js'
 import { AppError } from '../lib/errors.js'
 import { generateReservationCode } from '../lib/utils.js'
-import { RESERVATION_CONFIG, TICKET_PRICES } from '../shared/constants.js'
+import { RESERVATION_CONFIG, TICKET_PRICES, type TicketType } from '../shared/constants.js'
 
 export class ReservationService {
   static async holdSeats(scheduleId: number, seatIds: number[]): Promise<{ reservationCode: string, expiresAt: Date }> {
@@ -77,7 +77,7 @@ export class ReservationService {
     memberId: number | null
     bookingType: 'member' | 'guest'
     customer: { name: string, email: string }
-    tickets: { seatId: number, ticketType: string }[]
+    tickets: { seatId: number, ticketType: TicketType }[]
     seatIds: number[]
   }): Promise<{ reservationId: number, reservationCode: string, totalPrice: number }> {
     const { reservationCode, scheduleId, memberId, bookingType, customer, tickets, seatIds } = params

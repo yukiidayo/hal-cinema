@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import type mysql from 'mysql2/promise'
 import type { AppEnv } from '../types.js'
 import { pool } from '../db/client.js'
 import { AppError } from '../lib/errors.js'
