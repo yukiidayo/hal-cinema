@@ -171,7 +171,7 @@ export function useBooking() {
       // 3. 次の画面へ
       const auth = await getAuthState()
       if (auth.authenticated) {
-        navigate("/reservations/customer")
+        navigate("/reservations/tickets")
       } else {
         navigate("/reservations/entry")
       }

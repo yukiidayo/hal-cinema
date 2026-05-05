@@ -7,6 +7,7 @@ const OTP_RESEND_SEC = 60
 
 export function useOtp() {
   const [code, setCode] = useState("")
+  const [email, setEmail] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(OTP_RESEND_SEC)
@@ -17,10 +18,16 @@ export function useOtp() {
 
   const type = searchParams.get("type") === "register" ? "register" : "login"
   const redirect = safeRedirect(searchParams.get("redirect"))
-  const email =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("hal_cinema_pending_email") ?? ""
-      : ""
+
+  // クライアントでのみ sessionStorage から読み込む（SSR 対応）
+  useEffect(() => {
+    const stored = sessionStorage.getItem("hal_cinema_pending_email") ?? ""
+    if (!stored) {
+      navigate("/movies", { replace: true })
+      return
+    }
+    setEmail(stored)
+  }, [navigate])
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -34,12 +41,6 @@ export function useOtp() {
     }, 1000)
     return () => clearInterval(timerRef.current!)
   }, [])
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && !email) {
-      navigate("/movies", { replace: true })
-    }
-  }, [email, navigate])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

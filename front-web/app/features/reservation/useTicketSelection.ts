@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router"
 import { apiFetch } from "~/shared/api/client"
+import { getAuthState } from "~/shared/api/auth"
 import { draft, type SelectedSeat } from "~/entities/reservation/draft"
 import {
   TICKET_TYPES, calcTotalPrice, type TicketType
@@ -23,6 +24,8 @@ export function useTicketSelection() {
   const [quoting, setQuoting] = useState(false)
 
   useEffect(() => {
+    let mounted = true
+
     const d = draft.get()
     if (!d.scheduleId || !d.selectedSeats || d.selectedSeats.length === 0) {
       navigate("/movies", { replace: true })
@@ -31,9 +34,33 @@ export function useTicketSelection() {
 
     setSelectedSeats(d.selectedSeats)
 
-    apiFetch<ScheduleInfo>(`/schedules/${d.scheduleId}`)
-      .then(setInfo)
-      .finally(() => setLoading(false))
+    const init = async () => {
+      if (!d.bookingType) {
+        const auth = await getAuthState()
+        if (!mounted) return
+        if (auth.authenticated) {
+          try {
+            const profile = await apiFetch<{ email: string; name?: string }>("/members/profile")
+            if (!mounted) return
+            const memberName = profile.name ?? "会員様"
+            draft.set({ bookingType: "member", customer: { name: memberName, email: profile.email } })
+          } catch {
+            draft.set({ bookingType: "member" })
+          }
+        } else {
+          navigate("/reservations/entry", { replace: true })
+          return
+        }
+      }
+
+      apiFetch<ScheduleInfo>(`/schedules/${d.scheduleId}`)
+        .then(info => { if (mounted) setInfo(info) })
+        .finally(() => { if (mounted) setLoading(false) })
+    }
+
+    init()
+
+    return () => { mounted = false }
   }, [])
 
   useEffect(() => {

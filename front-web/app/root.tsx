@@ -51,11 +51,7 @@ export function Layout({children}: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    return (
-        <main className="mx-auto w-full max-w-5xl px-4 flex-1">
-            <Outlet/>
-        </main>
-    );
+    return <Outlet />
 }
 
 export function ErrorBoundary({error}: Route.ErrorBoundaryProps) {

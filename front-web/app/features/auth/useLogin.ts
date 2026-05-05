@@ -25,6 +25,11 @@ export function useLogin() {
       navigate(`/auth/otp?type=login&redirect=${encodeURIComponent(redirect)}`)
     } catch (err) {
       if (err instanceof ApiError) {
+        if (err.code === "OTP_RESEND_COOLDOWN") {
+          sessionStorage.setItem("hal_cinema_pending_email", email)
+          navigate(`/auth/otp?type=login&redirect=${encodeURIComponent(redirect)}`)
+          return
+        }
         setError(err.message)
       } else {
         setError("エラーが発生しました。時間をおいてお試しください。")

@@ -11,10 +11,10 @@ export default function EntryPage() {
             <h1 className="mb-6 text-2xl font-bold">予約を続けるには</h1>
 
             <div className="flex flex-col gap-3">
-                <Link to="/login?redirect=/reservations/customer">
+                <Link to="/login?redirect=/reservations/tickets">
                     <Button size="lg" className="w-full" variant="primary">ログインして予約</Button>
                 </Link>
-                <Link to="/register?redirect=/reservations/customer">
+                <Link to="/register?redirect=/reservations/tickets">
                     <Button size="lg" className="w-full" variant="secondary">新規会員登録して予約</Button>
                 </Link>
                 <button onClick={handleGuest}

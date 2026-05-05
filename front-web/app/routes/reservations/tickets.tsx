@@ -1,4 +1,3 @@
-import {Header} from "~/widgets/Header"
 import {Button} from "~/shared/ui/Button"
 import {TICKET_TYPES, TICKET_LABELS, TICKET_PRICES, formatJst} from "~/entities/ticket"
 import {useTicketSelection} from "~/features/reservation/useTicketSelection"
@@ -8,10 +7,9 @@ export default function TicketsPage() {
 
     if (loading) {
         return (
-            <>
-                <Header/>
-                <main className="mx-auto max-w-xl px-4 py-8"><p className="text-gray-500">読み込み中...</p></main>
-            </>
+            <div className="flex items-center justify-center py-20">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-600 border-t-transparent"/>
+            </div>
         )
     }
 
