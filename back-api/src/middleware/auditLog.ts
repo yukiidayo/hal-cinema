@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'hono'
-import type { AppEnv } from '../types.js'
+import type { AppEnv } from '#types.js'
 
 export const auditLogMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   await next()

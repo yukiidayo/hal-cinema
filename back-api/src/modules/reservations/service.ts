@@ -1,8 +1,8 @@
 import type mysql from 'mysql2/promise'
-import { pool } from '../../db/client.js'
-import { AppError } from '../../lib/errors.js'
-import { generateReservationCode, getQrCodeUrl, maskEmail } from '../../utils/format.js'
-import { RESERVATION_CONFIG, TICKET_PRICES, type TicketType } from '../../config/constants.js'
+import { pool } from '#db/client.js'
+import { AppError } from '#lib/errors.js'
+import { generateReservationCode, getQrCodeUrl, maskEmail } from '#utils/format.js'
+import { RESERVATION_CONFIG, TICKET_PRICES, type TicketType } from '#config/constants.js'
 
 export type SeatLayout = {
   screenId: number

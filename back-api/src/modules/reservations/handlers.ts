@@ -1,14 +1,14 @@
 import type { Context } from 'hono'
 import { z } from 'zod'
-import type { AppEnv } from '../../types.js'
-import { AppError } from '../../lib/errors.js'
-import { successResponse } from '../../utils/response.js'
-import { sendReservationEmail } from '../../lib/email.js'
-import { checkRateLimit } from '../../utils/rateLimit.js'
-import { getQrCodeUrl, toJstString } from '../../utils/format.js'
-import { TICKET_LABELS, TICKET_PRICES } from '../../config/constants.js'
-import { getFullScheduleById } from '../movies/service.js'
-import * as ReservationService from './service.js'
+import type { AppEnv } from '#types.js'
+import { AppError } from '#lib/errors.js'
+import { successResponse } from '#utils/response.js'
+import { sendReservationEmail } from '#lib/email.js'
+import { checkRateLimit } from '#utils/rateLimit.js'
+import { getQrCodeUrl, toJstString } from '#utils/format.js'
+import { TICKET_LABELS, TICKET_PRICES } from '#config/constants.js'
+import { getFullScheduleById } from '#modules/movies/service.js'
+import * as ReservationService from '#modules/reservations/service.js'
 
 const RESERVATION_CODE_RE = /^[A-Z0-9]{8,12}$/
 

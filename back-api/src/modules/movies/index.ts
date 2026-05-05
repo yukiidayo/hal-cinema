@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
-import type { AppEnv } from '../../types.js'
-import { listMovies, getMovie, getMovieSchedules, getSchedule } from './handlers.js'
+import type { AppEnv } from '#types.js'
+import { listMovies, getMovie, getMovieSchedules, getSchedule } from '#modules/movies/handlers.js'
 
 const router = new Hono<AppEnv>()
 

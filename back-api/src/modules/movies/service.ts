@@ -1,5 +1,5 @@
 import type mysql from 'mysql2/promise'
-import { pool } from '../../db/client.js'
+import { pool } from '#db/client.js'
 
 export type MovieRow = {
   id: number

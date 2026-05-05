@@ -1,7 +1,7 @@
 import type { MiddlewareHandler, Context } from 'hono'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
 import { randomUUID } from 'crypto'
-import type { AppEnv, SessionData } from '../types.js'
+import type { AppEnv, SessionData } from '#types.js'
 
 const SESSION_COOKIE = 'hal_cinema_session'
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 // 7 days

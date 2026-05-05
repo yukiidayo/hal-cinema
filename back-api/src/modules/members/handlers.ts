@@ -1,9 +1,9 @@
 import type { Context } from 'hono'
 import { z } from 'zod'
-import type { AppEnv } from '../../types.js'
-import { AppError } from '../../lib/errors.js'
-import { successResponse } from '../../utils/response.js'
-import * as MemberService from './service.js'
+import type { AppEnv } from '#types.js'
+import { AppError } from '#lib/errors.js'
+import { successResponse } from '#utils/response.js'
+import * as MemberService from '#modules/members/service.js'
 
 const createMemberSchema = z.object({
   email: z.string().email().max(254),

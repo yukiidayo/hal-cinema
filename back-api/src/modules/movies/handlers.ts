@@ -1,8 +1,8 @@
 import type { Context } from 'hono'
-import type { AppEnv } from '../../types.js'
-import { AppError } from '../../lib/errors.js'
-import { successResponse } from '../../utils/response.js'
-import * as MovieService from './service.js'
+import type { AppEnv } from '#types.js'
+import { AppError } from '#lib/errors.js'
+import { successResponse } from '#utils/response.js'
+import * as MovieService from '#modules/movies/service.js'
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 

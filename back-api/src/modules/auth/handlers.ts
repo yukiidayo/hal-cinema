@@ -1,13 +1,13 @@
 import type { Context } from 'hono'
 import { z } from 'zod'
-import type { AppEnv } from '../../types.js'
-import { AppError } from '../../lib/errors.js'
-import { successResponse } from '../../utils/response.js'
-import { sendOtpEmail } from '../../lib/email.js'
-import { createSession, destroySession } from '../../middleware/session.js'
-import { checkRateLimit } from '../../utils/rateLimit.js'
-import { OTP_CONFIG } from '../../config/constants.js'
-import * as AuthService from './service.js'
+import type { AppEnv } from '#types.js'
+import { AppError } from '#lib/errors.js'
+import { successResponse } from '#utils/response.js'
+import { sendOtpEmail } from '#lib/email.js'
+import { createSession, destroySession } from '#middleware/session.js'
+import { checkRateLimit } from '#utils/rateLimit.js'
+import { OTP_CONFIG } from '#config/constants.js'
+import * as AuthService from '#modules/auth/service.js'
 
 const sendOtpSchema = z.object({
   email: z.string().email().max(254),

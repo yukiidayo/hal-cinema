@@ -1,8 +1,8 @@
 import type mysql from 'mysql2/promise'
-import { pool } from '../../db/client.js'
-import { AppError } from '../../lib/errors.js'
-import { generateOtp, hashOtp } from '../../utils/otp.js'
-import { OTP_CONFIG } from '../../config/constants.js'
+import { pool } from '#db/client.js'
+import { AppError } from '#lib/errors.js'
+import { generateOtp, hashOtp } from '#utils/otp.js'
+import { OTP_CONFIG } from '#config/constants.js'
 
 export async function getOrCreateMember(email: string): Promise<number> {
   const [rows] = await pool.execute<mysql.RowDataPacket[]>(

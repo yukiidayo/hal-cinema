@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
-import type { AppEnv } from '../../types.js'
-import { getMe, sendOtp, verifyOtp, logout } from './handlers.js'
+import type { AppEnv } from '#types.js'
+import { getMe, sendOtp, verifyOtp, logout } from '#modules/auth/handlers.js'
 
 const router = new Hono<AppEnv>()
 
