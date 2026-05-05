@@ -1,6 +1,7 @@
 import {Button} from "~/shared/ui/Button"
 import {formatJst} from "~/entities/ticket"
 import {useBooking} from "~/features/reservation/useBooking"
+import {SeatMap} from "~/widgets/SeatMap"
 
 export default function BookingPage() {
     const {
@@ -73,49 +74,13 @@ export default function BookingPage() {
                     <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">3. 座席を選択</h2>
                     <p className="mt-1 text-xs text-gray-400">最大8席まで選択できます</p>
 
-                    <div className="mt-6 flex justify-center gap-6 text-xs font-bold text-gray-500">
-                        <span className="flex items-center gap-1.5"><span
-                            className="h-3 w-3 rounded-sm bg-emerald-400"/>空席</span>
-                        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-red-500"/>選択中</span>
-                        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-gray-300"/>予約済</span>
-                    </div>
-
-                    {mapLoading ? (
-                        <div
-                            className="flex aspect-video w-full items-center justify-center rounded-2xl bg-gray-900 mt-6">
-                            <div
-                                className="h-8 w-8 animate-spin rounded-full border-4 border-gray-700 border-t-red-600"/>
-                        </div>
-                    ) : mapData && (
-                        <div
-                            className="relative mx-auto mt-6 w-full max-w-2xl overflow-hidden rounded-2xl bg-gray-900 p-8 shadow-2xl"
-                            style={{aspectRatio: mapData.layout.aspectRatio.replace("/", " / ")}}>
-                            <div
-                                className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-gray-800 px-10 py-1 text-[10px] font-black tracking-[0.5em] text-gray-500">SCREEN
-                            </div>
-                            {mapData.seats.map(seat => (
-                                <button
-                                    key={seat.seatId}
-                                    onClick={() => toggleSeat(seat)}
-                                    disabled={seat.status === "reserved"}
-                                    style={{
-                                        position: "absolute",
-                                        left: `${seat.positionLeftPct}%`,
-                                        top: `${seat.positionTopPct}%`,
-                                        width: `${seat.seatWidthPct}%`,
-                                        height: `${seat.seatHeightPct}%`,
-                                        transform: "translate(-50%, -50%)"
-                                    }}
-                                    className={`rounded-sm transition-all duration-200 ${
-                                        seat.status === "reserved"
-                                            ? "bg-gray-700 opacity-40 cursor-not-allowed"
-                                            : selectedSeatIds.includes(seat.seatId)
-                                                ? "bg-red-500 ring-4 ring-red-500/30 scale-125 z-10"
-                                                : "bg-emerald-400 hover:bg-emerald-300 hover:scale-110"
-                                    }`}
-                                />
-                            ))}
-                        </div>
+                    {mapData && (
+                        <SeatMap
+                            mapData={mapData}
+                            mapLoading={mapLoading}
+                            selectedSeatIds={selectedSeatIds}
+                            toggleSeat={toggleSeat}
+                        />
                     )}
 
                     {selectedSeatIds.length > 0 && (
