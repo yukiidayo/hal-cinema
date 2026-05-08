@@ -34,10 +34,10 @@ export const sendOtp = async (c: Context<AppEnv>) => {
   const body = await c.req.json().catch(() => { throw new AppError('VALIDATION_ERROR', 'Invalid JSON body') })
   const { email, type } = sendOtpSchema.parse(body)
 
-  if (!checkRateLimit(`otp:send:ip:${ip}`, 5, 10 * 60 * 1000)) {
+  if (!checkRateLimit(`otp:send:ip:${ip}`, 10, 10 * 60 * 1000)) {
     throw new AppError('OTP_RESEND_COOLDOWN', 'Too many requests from this IP')
   }
-  if (!checkRateLimit(`otp:send:email:${email}`, 3, 10 * 60 * 1000)) {
+  if (!checkRateLimit(`otp:send:email:${email}`, 5, 10 * 60 * 1000)) {
     throw new AppError('OTP_RESEND_COOLDOWN', 'Too many OTP requests for this email')
   }
 
