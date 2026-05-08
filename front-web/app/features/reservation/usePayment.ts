@@ -3,6 +3,7 @@ import { useNavigate } from "react-router"
 import { apiFetch, ApiError } from "~/shared/api/client"
 import { draft, type ReservationDraft } from "~/entities/reservation/draft"
 import { TICKET_PRICES } from "~/entities/ticket"
+import { getPaymentGuardIssue } from "~/processes/reservation-flow/guards"
 
 type ScheduleInfo = {
   movieTitle: string
@@ -16,19 +17,6 @@ type CompletePaymentDraft = ReservationDraft & {
   layoutVersion: number
   selectedSeats: NonNullable<ReservationDraft["selectedSeats"]>
   customer: NonNullable<ReservationDraft["customer"]>
-}
-
-function resolvePaymentDraftIssue(d: ReservationDraft): { message: string; redirectTo: string } | null {
-  if (!d.selectedSeats || d.selectedSeats.length === 0 || !d.scheduleId) {
-    return { message: "座席情報が不足しています。上映回選択からやり直してください。", redirectTo: "/movies" }
-  }
-  if (!d.customer?.name || !d.customer?.email) {
-    return { message: "お客様情報が不足しています。入力画面へ戻ります。", redirectTo: "/reservations/customer" }
-  }
-  if (!d.layoutVersion || !d.reservationCode) {
-    return { message: "座席の仮押さえ情報が不足しています。座席選択からやり直してください。", redirectTo: "/movies" }
-  }
-  return null
 }
 
 function isCompletePaymentDraft(d: ReservationDraft): d is CompletePaymentDraft {
@@ -55,7 +43,7 @@ export function usePayment() {
   const [recoverPath, setRecoverPath] = useState<string | null>(null)
 
   useEffect(() => {
-    const issue = resolvePaymentDraftIssue(d)
+    const issue = getPaymentGuardIssue(d)
     if (issue) {
       setError(issue.message)
       setRecoverPath(issue.redirectTo)
@@ -74,7 +62,7 @@ export function usePayment() {
     e.preventDefault()
 
     if (!isCompletePaymentDraft(d)) {
-      const issue = resolvePaymentDraftIssue(d) ?? {
+      const issue = getPaymentGuardIssue(d) ?? {
         message: "予約情報が不足しています。最初からやり直してください。",
         redirectTo: "/movies",
       }

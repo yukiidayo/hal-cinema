@@ -3,6 +3,7 @@ import { useNavigate } from "react-router"
 import { draft } from "~/entities/reservation/draft"
 import { getAuthState } from "~/shared/api/auth"
 import { apiFetch } from "~/shared/api/client"
+import { getCustomerGuardIssue } from "~/processes/reservation-flow/guards"
 
 export function useCustomerForm() {
   const navigate = useNavigate()
@@ -18,6 +19,11 @@ export function useCustomerForm() {
       if (!mounted) return
 
       const d = draft.get()
+      const issue = getCustomerGuardIssue(d)
+      if (issue) {
+        navigate(issue.redirectTo, { replace: true })
+        return
+      }
       const hasSeats = d.selectedSeats && d.selectedSeats.length > 0
 
       if (auth.authenticated) {
@@ -36,22 +42,12 @@ export function useCustomerForm() {
             navigate("/reservations/tickets", { replace: true })
             return
           }
-        } catch (e) {
+        } catch {
           // プロフィール取得失敗時は手入力を許可
         }
       }
 
-      // ログインしていない、または座席がない場合の最終判定
-      if (!hasSeats) {
-        // 少し待ってもデータがなければ映画一覧へ（ブラウザのStorage復元待ち）
-        setTimeout(() => {
-          if (mounted && !draft.get().selectedSeats) {
-            navigate("/movies", { replace: true })
-          }
-        }, 300)
-      } else {
-        setIsReady(true)
-      }
+      setIsReady(true)
     })
 
     return () => { mounted = false }

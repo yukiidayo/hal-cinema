@@ -1,14 +1,16 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router"
 import { draft } from "~/entities/reservation/draft"
+import { getEntryGuardIssue } from "~/processes/reservation-flow/guards"
 
 export function useEntry() {
   const navigate = useNavigate()
   const d = draft.get()
 
   useEffect(() => {
-    if (!d.selectedSeats || d.selectedSeats.length === 0) {
-      navigate("/movies", { replace: true })
+    const issue = getEntryGuardIssue(d)
+    if (issue) {
+      navigate(issue.redirectTo, { replace: true })
     }
   }, [])
 

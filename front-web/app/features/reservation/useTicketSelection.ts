@@ -6,6 +6,7 @@ import { draft, type SelectedSeat } from "~/entities/reservation/draft"
 import {
   TICKET_TYPES, calcTotalPrice, type TicketType
 } from "~/entities/ticket"
+import { getTicketsGuardIssue } from "~/processes/reservation-flow/guards"
 
 type ScheduleInfo = {
   scheduleId: number
@@ -27,8 +28,9 @@ export function useTicketSelection() {
     let mounted = true
 
     const d = draft.get()
-    if (!d.scheduleId || !d.selectedSeats || d.selectedSeats.length === 0) {
-      navigate("/movies", { replace: true })
+    const issue = getTicketsGuardIssue(d)
+    if (issue) {
+      navigate(issue.redirectTo, { replace: true })
       return
     }
 

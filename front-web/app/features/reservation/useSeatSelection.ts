@@ -4,6 +4,7 @@ import { apiFetch, ApiError } from "~/shared/api/client"
 import { draft, type SelectedSeat } from "~/entities/reservation/draft"
 import { getAuthState } from "~/shared/api/auth"
 import { buildTypeQueue, totalTicketCount } from "~/entities/ticket"
+import { getTicketsGuardIssue } from "~/processes/reservation-flow/guards"
 
 type SeatData = {
   seatId: number
@@ -43,8 +44,9 @@ export function useSeatSelection() {
   const requiredCount = ticketCounts ? totalTicketCount(ticketCounts) : 0
 
   useEffect(() => {
-    if (!ticketCounts || requiredCount === 0) {
-      navigate("/movies", { replace: true })
+    const issue = getTicketsGuardIssue(d)
+    if (issue || !ticketCounts || requiredCount === 0) {
+      navigate((issue?.redirectTo) ?? "/movies", { replace: true })
     }
   }, [])
 

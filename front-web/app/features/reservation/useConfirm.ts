@@ -3,6 +3,7 @@ import { useNavigate } from "react-router"
 import { apiFetch } from "~/shared/api/client"
 import { draft } from "~/entities/reservation/draft"
 import { TICKET_PRICES } from "~/entities/ticket"
+import { getConfirmGuardIssue } from "~/processes/reservation-flow/guards"
 
 type ScheduleInfo = {
   movieTitle: string
@@ -17,11 +18,11 @@ export function useConfirm() {
   const [schedInfo, setSchedInfo] = useState<ScheduleInfo | null>(null)
 
   useEffect(() => {
-    if (!d.customer?.name || !d.customer?.email) {
-      navigate("/movies", { replace: true })
+    const issue = getConfirmGuardIssue(d)
+    if (issue) {
+      navigate(issue.redirectTo, { replace: true })
       return
     }
-    if (!d.scheduleId) return
     apiFetch<ScheduleInfo>(`/schedules/${d.scheduleId}`).then(setSchedInfo).catch(() => {})
   }, [])
 
