@@ -5,11 +5,60 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+:root {
+  --sidebar-width: 240px;
+  --header-height: 56px;
+}
+
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-gray-50;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+@layer components {
+  .page-header {
+    @apply flex items-start justify-between mb-6;
+  }
+  .page-title {
+    @apply text-2xl font-black text-gray-900;
+  }
+  .page-description {
+    @apply mt-1 text-sm text-gray-500;
+  }
+  .admin-card {
+    @apply bg-white rounded-xl border border-gray-200 p-6;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors cursor-pointer;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer;
+  }
+  .btn-danger {
+    @apply inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors cursor-pointer;
+  }
+  .data-table {
+    @apply w-full text-sm border-collapse;
+  }
+  .data-table th {
+    @apply text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-200 bg-gray-50;
+  }
+  .data-table td {
+    @apply px-4 py-3 border-b border-gray-100 text-gray-700;
+  }
+  .data-table tbody tr:hover {
+    @apply bg-gray-50;
+  }
+  .status-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .status-active {
+    @apply bg-green-100 text-green-700;
+  }
+  .status-inactive {
+    @apply bg-gray-100 text-gray-600;
+  }
+  .status-pending {
+    @apply bg-yellow-100 text-yellow-700;
   }
 }
