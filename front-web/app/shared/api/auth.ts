@@ -1,8 +1,23 @@
+import { createContext, useContext } from "react"
 import { apiFetch } from "~/shared/api/client"
 
 export type AuthState =
   | { authenticated: false }
   | { authenticated: true; memberId: number }
+
+export type AuthContextValue = {
+  auth: AuthState
+  setAuth: (auth: AuthState) => void
+}
+
+export const AuthContext = createContext<AuthContextValue>({
+  auth: { authenticated: false },
+  setAuth: () => {},
+})
+
+export function useAuth() {
+  return useContext(AuthContext)
+}
 
 export async function getAuthState(): Promise<AuthState> {
   try {

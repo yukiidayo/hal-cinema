@@ -14,3 +14,7 @@ pnpm-debug.log*
 .claude
 /sql/
 doc
+
+CLAUDE.md
+AGENTS.md
+memo.md

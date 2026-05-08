@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate, useSearchParams } from "react-router"
 import { apiFetch, ApiError } from "~/shared/api/client"
-import { safeRedirect } from "~/shared/api/auth"
+import { safeRedirect, useAuth } from "~/shared/api/auth"
 
 const OTP_RESEND_SEC = 60
 
@@ -15,6 +15,7 @@ export function useOtp() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { setAuth } = useAuth()
 
   const type = searchParams.get("type") === "register" ? "register" : "login"
   const redirect = safeRedirect(searchParams.get("redirect"))
@@ -47,11 +48,12 @@ export function useOtp() {
     setError("")
     setLoading(true)
     try {
-      await apiFetch("/auth/otp/verify", {
+      const result = await apiFetch<{ memberId: number }>("/auth/otp/verify", {
         method: "POST",
         body: JSON.stringify({ email, code, type }),
       })
       sessionStorage.removeItem("hal_cinema_pending_email")
+      setAuth({ authenticated: true, memberId: result.memberId })
       navigate(redirect, { replace: true })
     } catch (err) {
       if (err instanceof ApiError) {

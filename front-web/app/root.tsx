@@ -6,11 +6,13 @@ import {
     Scripts,
     ScrollRestoration,
 } from "react-router";
+import { useState, useEffect } from "react";
 
 import type {Route} from "./+types/root";
 import "~/app.css";
 import {HoldTimer} from "~/widgets/HoldTimer";
 import {Header} from "~/widgets/Header";
+import { AuthContext, getAuthState, type AuthState } from "~/shared/api/auth";
 
 export const links: Route.LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
@@ -26,7 +28,14 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({children}: { children: React.ReactNode }) {
+    const [auth, setAuth] = useState<AuthState>({ authenticated: false })
+
+    useEffect(() => {
+        getAuthState().then(setAuth)
+    }, [])
+
     return (
+        <AuthContext.Provider value={{ auth, setAuth }}>
         <html lang="ja">
         <head>
             <meta charSet="utf-8"/>
@@ -47,6 +56,7 @@ export function Layout({children}: { children: React.ReactNode }) {
         <Scripts/>
         </body>
         </html>
+        </AuthContext.Provider>
     );
 }
 

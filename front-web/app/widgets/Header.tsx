@@ -1,30 +1,25 @@
 import { Link, useNavigate } from "react-router"
-import { useEffect, useState } from "react"
 import { AppConfig } from "~/shared/config/app"
-import { getAuthState, type AuthState } from "~/shared/api/auth"
+import { useAuth } from "~/shared/api/auth"
 import { apiFetch } from "~/shared/api/client"
 import { Button } from "~/shared/ui/Button"
 
 export function Header() {
-  const [auth, setAuth] = useState<AuthState>({ authenticated: false })
+  const { auth, setAuth } = useAuth()
   const navigate = useNavigate()
-
-  useEffect(() => {
-    getAuthState().then(setAuth)
-  }, [])
 
   async function handleLogout() {
     try {
       await apiFetch("/auth/logout", { method: "POST" })
-      setAuth({ authenticated: false })
-      navigate("/")
     } catch {
-      // Ignore error
+      // ignore
     }
+    setAuth({ authenticated: false })
+    navigate("/")
   }
 
   return (
-    <header className="bg-white border-b border-gray-100 z-50 py-4">
+    <header className="px-10 bg-white border-b border-gray-100 z-50 py-4">
       <div className="flex items-center justify-between">
         <Link to="/" className="text-2xl font-black tracking-tighter text-red-600">
           {AppConfig.name}
