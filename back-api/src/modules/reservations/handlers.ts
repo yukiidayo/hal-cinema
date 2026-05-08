@@ -8,7 +8,7 @@ import { checkRateLimit } from '#utils/rateLimit.js'
 import { getQrCodeUrl, toJstString } from '#utils/format.js'
 import { TICKET_LABELS, TICKET_PRICES } from '#config/constants.js'
 import { getFullScheduleById } from '#modules/movies/service.js'
-import * as ReservationService from '#application/reservations/service.js'
+import * as ReservationService from '#modules/reservations/service.js'
 
 const RESERVATION_CODE_RE = /^[A-Z0-9]{8,12}$/
 
@@ -65,6 +65,10 @@ export const holdSeats = async (c: Context<AppEnv>) => {
     seatIds: z.array(z.number().int().positive()).min(1).max(8),
   }).parse(body)
 
+  if (new Set(seatIds).size !== seatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'Duplicate seat IDs')
+  }
+
   const { reservationCode, expiresAt } = await ReservationService.holdSeats(scheduleId, seatIds)
   return c.json(successResponse({ reservationCode, expiresAt: expiresAt.toISOString() }, requestId), 201)
 }
@@ -96,6 +100,19 @@ export const createReservation = async (c: Context<AppEnv>) => {
     }),
   }).parse(body)
 
+  if (new Set(data.seatIds).size !== data.seatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'Duplicate seat IDs')
+  }
+
+  const ticketSeatIds = data.tickets.map(t => t.seatId)
+  if (new Set(ticketSeatIds).size !== ticketSeatIds.length) {
+    throw new AppError('VALIDATION_ERROR', 'Duplicate ticket seat IDs')
+  }
+
+  if (data.seatIds.length !== data.tickets.length || !data.tickets.every(t => data.seatIds.includes(t.seatId))) {
+    throw new AppError('VALIDATION_ERROR', 'seatIds and tickets.seatId must match exactly')
+  }
+
   let memberId: number | null = null
   if (data.bookingType === 'member') {
     if (!session) throw new AppError('UNAUTHORIZED', 'Authentication required for member booking')
@@ -115,7 +132,6 @@ export const createReservation = async (c: Context<AppEnv>) => {
     bookingType: data.bookingType,
     customer: data.customer,
     tickets: data.tickets,
-    seatIds: data.seatIds,
   })
 
   const qrCodeUrl = getQrCodeUrl(reservationCode)

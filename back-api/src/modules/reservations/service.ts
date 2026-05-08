@@ -284,9 +284,6 @@ export async function finalizeReservation(params: {
 }): Promise<{ reservationId: number; reservationCode: string; totalPrice: number }> {
   const { reservationCode, scheduleId, memberId, bookingType, customer, tickets } = params
   const seatIds = tickets.map(t => t.seatId)
-  if (new Set(seatIds).size !== seatIds.length) {
-    throw new AppError('VALIDATION_ERROR', 'Duplicate ticket seat IDs')
-  }
   const totalPrice = tickets.reduce((sum, t) => sum + TICKET_PRICES[t.ticketType], 0)
   const placeholders = seatIds.map(() => '?').join(',')
 
