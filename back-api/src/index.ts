@@ -6,10 +6,10 @@ import { requestIdMiddleware } from '#middleware/requestId.js'
 import { sessionMiddleware } from '#middleware/session.js'
 import { errorHandler } from '#middleware/errorHandler.js'
 import { auditLogMiddleware } from '#middleware/auditLog.js'
-import membersRouter from '#modules/members/index.js'
-import authRouter from '#modules/auth/index.js'
-import moviesRouter from '#modules/movies/index.js'
-import reservationsRouter from '#modules/reservations/index.js'
+import membersRouter from '#interfaces/http/members/router.js'
+import authRouter from '#interfaces/http/auth/router.js'
+import moviesRouter from '#interfaces/http/movies/router.js'
+import reservationsRouter from '#interfaces/http/reservations/router.js'
 
 const app = new Hono<AppEnv>()
 
