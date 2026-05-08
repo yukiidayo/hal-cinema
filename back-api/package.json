@@ -1,0 +1,22 @@
+{
+  "name": "back-api",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:up": "docker compose --env-file .env -f docker-compose.yml up -d",
+    "db:down": "docker compose --env-file .env -f docker-compose.yml down",
+    "db:logs": "docker compose --env-file .env -f docker-compose.yml logs -f mysql",
+    "db:reset": "docker compose --env-file .env -f docker-compose.yml down -v"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.14",
+    "hono": "^4.12.15"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}

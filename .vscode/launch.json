@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "front-web run",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm.cmd run dev",
+      "cwd": "${workspaceFolder}\\front-web"
+    },
+    {
+      "name": "back-api run",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm.cmd run dev",
+      "cwd": "${workspaceFolder}\\back-api"
+    },
+    {
+      "name": "admin-web run",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm.cmd run dev",
+      "cwd": "${workspaceFolder}\\admin-web"
+    },
+    {
+      "name": "db:up",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm.cmd run db:up",
+      "cwd": "${workspaceFolder}\\back-api"
+    },
+    {
+      "name": "db:down",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm.cmd run db:down",
+      "cwd": "${workspaceFolder}\\back-api"
+    },
+    {
+      "name": "db:reset",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm.cmd run db:reset",
+      "cwd": "${workspaceFolder}\\back-api"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "all dev",
+      "configurations": ["db:up", "back-api dev", "front-web dev", "admin-web dev"]
+    }
+  ]
+}
