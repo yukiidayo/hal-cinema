@@ -1,3 +1,4 @@
+
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="db:reset" type="js.build_tools.npm" factoryName="npm">
     <package-json value="$PROJECT_DIR$/back-api/package.json" />

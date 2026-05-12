@@ -11,3 +11,10 @@ pnpm-debug.log*
 .env
 .env.*
 .idea/
+.claude
+/sql/
+doc
+
+CLAUDE.md
+AGENTS.md
+memo.md

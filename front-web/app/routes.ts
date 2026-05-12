@@ -1,3 +1,30 @@
-import { type RouteConfig, index } from "@react-router/dev/routes";
+import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
-export default [index("routes/home.tsx")] satisfies RouteConfig;
+export default [
+  index("routes/home.tsx"),
+
+  // 映画情報
+  route("/movies", "routes/movies/index.tsx"),
+  route("/movies/:movieId", "routes/movies/detail.tsx"),
+
+  // 認証
+  route("/login", "routes/auth/login.tsx"),
+  route("/register", "routes/auth/register.tsx"),
+  route("/auth/otp", "routes/auth/otp.tsx"),
+
+  // 予約フロー
+  route("/reservations/booking/:movieId", "routes/reservations/booking.tsx"),
+  route("/reservations/entry", "routes/reservations/entry.tsx"),
+  route("/reservations/customer", "routes/reservations/customer.tsx"),
+  route("/reservations/tickets", "routes/reservations/tickets.tsx"),
+  route("/reservations/confirm", "routes/reservations/confirm.tsx"),
+  route("/reservations/payment", "routes/reservations/payment.tsx"),
+  route("/reservations/complete", "routes/reservations/complete.tsx"),
+  route("/reservations/lookup", "routes/reservations/lookup.tsx"),
+
+  // 会員マイページ
+  route("/member/reservations", "routes/member/reservations.tsx"),
+
+  // 予約詳細 (動的ルートは最後)
+  route("/reservations/r/:reservationCode", "routes/reservations/detail.tsx"),
+] satisfies RouteConfig;
