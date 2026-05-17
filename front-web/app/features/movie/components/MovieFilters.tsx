@@ -1,9 +1,9 @@
 type Props = {
     selectedStatus: string;
     selectedDate: string;
-    view: "grid" | "list";
+    view: "grid" | "list" | "timetable";
     onStatusChange: (status: string) => void;
-    onViewChange: (v: "grid" | "list") => void;
+    onViewChange: (v: "grid" | "list" | "timetable") => void;
     onClearAll: () => void;
     // 他のフィルタ（検索など）も将来的にここに追加
 };
@@ -61,6 +61,17 @@ export function MovieFilters({selectedStatus, selectedDate, view, onStatusChange
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                               d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                </button>
+                <button
+                    onClick={() => onViewChange("timetable")}
+                    className={`rounded-md p-1.5 transition ${
+                        view === "timetable" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+                    }`}
+                >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                              d="M3 6h10 M3 11h16 M3 16h8"/>
                     </svg>
                 </button>
             </div>

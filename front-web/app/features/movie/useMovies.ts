@@ -9,7 +9,7 @@ export function useMovies() {
   const selectedDate = searchParams.get("date") ?? ""
   const selectedStatus = (searchParams.get("status") ?? "") as "" | "now_showing" | "coming_soon"
   const sortBy = (searchParams.get("sort") ?? "newest") as "newest" | "title" | "duration"
-  const view = (searchParams.get("view") ?? "grid") as "grid" | "list"
+  const view = (searchParams.get("view") ?? "grid") as "grid" | "list" | "timetable"
 
   const [movies, setMovies] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
@@ -61,10 +61,11 @@ export function useMovies() {
     })
   }
 
-  function setView(v: "grid" | "list") {
+  function setView(v: "grid" | "list" | "timetable") {
     setSearchParams(prev => {
       const p = new URLSearchParams(prev)
-      if (v === "list") p.set("view", "list"); else p.delete("view")
+      if (v === "grid") p.delete("view")
+      else p.set("view", v)
       return p
     })
   }

@@ -1,11 +1,12 @@
 import type { Movie } from "~/entities/movie/types";
 import { MovieGridCard, MovieListCard } from "~/widgets/MovieCard";
+import TimetableView from "~/features/movie/components/TimetableView";
 
 type Props = {
   movies: Movie[];
   selectedDate: string;
   loading: boolean;
-  view: "grid" | "list";
+  view: "grid" | "list" | "timetable";
   error?: string;
 };
 
@@ -35,6 +36,10 @@ export function MovieGrid({ movies, selectedDate, loading, view, error }: Props)
         </p>
       </div>
     );
+  }
+
+  if (view === "timetable") {
+    return <TimetableView movies={movies} selectedDate={selectedDate} />;
   }
 
   if (view === "list") {
