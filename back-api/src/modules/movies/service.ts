@@ -16,6 +16,7 @@ export type ScheduleRow = {
   starts_at: Date | string
   ends_at: Date | string
   remaining_seats: number
+  total_seats: number
 }
 
 export type FullScheduleRow = {
@@ -29,6 +30,7 @@ export type FullScheduleRow = {
   starts_at: Date | string
   ends_at: Date | string
   remaining_seats: number
+  total_seats: number
 }
 
 export async function getMovieById(movieId: number): Promise<MovieRow | null> {
@@ -46,6 +48,7 @@ export async function getSchedulesByMovieId(movieId: number, date?: string): Pro
       sc.name as screen_name,
       sch.starts_at,
       sch.ends_at,
+      sc.total_seats,
       sc.total_seats - COALESCE((
         SELECT COUNT(*) FROM reservation_seats rs
         JOIN reservations r ON r.id = rs.reservation_id
@@ -79,6 +82,7 @@ export async function getFullScheduleById(scheduleId: number): Promise<FullSched
        sc.id as screen_id,
        sch.starts_at,
        sch.ends_at,
+       sc.total_seats,
        sc.total_seats - COALESCE((
          SELECT COUNT(*) FROM reservation_seats rs
          JOIN reservations r ON r.id = rs.reservation_id

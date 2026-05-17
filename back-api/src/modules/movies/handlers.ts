@@ -32,6 +32,7 @@ export const listMovies = async (c: Context<AppEnv>) => {
         startsAt: s.starts_at,
         endsAt: s.ends_at,
         remainingSeats: Number(s.remaining_seats),
+        totalSeats: Number(s.total_seats),
       })),
     }
   }))
@@ -86,6 +87,7 @@ export const getMovieSchedules = async (c: Context<AppEnv>) => {
       startsAt: r.starts_at,
       endsAt: r.ends_at,
       remainingSeats: Number(r.remaining_seats),
+      totalSeats: Number(r.total_seats),
     })),
   }, requestId))
 }
@@ -109,5 +111,6 @@ export const getSchedule = async (c: Context<AppEnv>) => {
     startsAt: r.starts_at,
     endsAt: r.ends_at,
     remainingSeats: Number(r.remaining_seats),
+    totalSeats: Number(r.total_seats),
   }, requestId))
 }
