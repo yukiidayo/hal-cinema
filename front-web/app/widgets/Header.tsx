@@ -26,6 +26,12 @@ export function Header() {
         </Link>
 
         <nav className="flex items-center gap-6">
+          <Link to="/shop" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
+            ショップ
+          </Link>
+          <Link to="/goods" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
+            グッズ
+          </Link>
           <Link to="/reservations/lookup" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
             予約確認
           </Link>

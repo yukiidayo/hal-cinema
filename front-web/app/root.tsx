@@ -11,7 +11,6 @@ import { useState, useEffect } from "react";
 import type {Route} from "./+types/root";
 import "~/app.css";
 import {HoldTimer} from "~/widgets/HoldTimer";
-import {Header} from "~/widgets/Header";
 import {DebugTools} from "~/widgets/DebugTools";
 import { AuthContext, getAuthState, type AuthState } from "~/shared/api/auth";
 import { useTheme } from "~/shared/lib/theme";
@@ -48,12 +47,9 @@ export function Layout({children}: { children: React.ReactNode }) {
         </head>
         <body className="selection:bg-primary/30 selection:text-primary-foreground antialiased">
         <div className="sticky top-0 z-50 flex flex-col">
-            <Header/>
             <HoldTimer/>
         </div>
-        <main className="container-center flex-1">
-            <Outlet/>
-        </main>
+        <Outlet/>
         <ScrollRestoration/>
         <Scripts/>
 

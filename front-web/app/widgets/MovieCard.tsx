@@ -1,6 +1,6 @@
 import { Link } from "react-router"
 import type { Movie } from "~/entities/movie/types"
-import { formatDateJst, formatTimeJst } from "~/shared/lib/date"
+import { formatDateJst, formatTimeJst, todayJst } from "~/shared/lib/date"
 
 type Props = {
   movie: Movie
@@ -8,32 +8,37 @@ type Props = {
 }
 
 export function MovieGridCard({ movie, selectedDate }: Props) {
+  const today = todayJst()
+
   return (
     <div className="group flex flex-col gap-3">
-      <Link
-        to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
-        className="relative aspect-2/3 overflow-hidden rounded-lg bg-muted shadow-lg transition-transform duration-300 group-hover:-translate-y-1"
-      >
-        {movie.thumbnailUrl ? (
-          <img
-            src={movie.thumbnailUrl}
-            alt={movie.title}
-            className="h-full w-full object-cover transition-opacity duration-300 group-hover:opacity-60"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground text-5xl">🎬</div>
-        )}
-        
-        {/* Hover Reserve Button */}
-        <div className="absolute inset-0 flex items-end justify-center p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+      <div className="relative aspect-2/3 overflow-hidden rounded-lg bg-muted shadow-lg transition-transform duration-300 group-hover:-translate-y-1">
+        {/* ポスターリンク */}
+        <Link
+          to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
+          className="absolute inset-0"
+        >
+          {movie.thumbnailUrl ? (
+            <img
+              src={movie.thumbnailUrl}
+              alt={movie.title}
+              className="h-full w-full object-cover transition-opacity duration-300 group-hover:opacity-60"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted-foreground text-5xl">🎬</div>
+          )}
+        </Link>
+
+        {/* 予約ボタン（ポスターリンクとは独立） */}
+        <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Link
-            to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
-            className="w-full rounded-md bg-primary py-2 text-center text-sm font-bold text-primary-foreground shadow-xl transition-transform duration-300 translate-y-2 group-hover:translate-y-0"
+            to={`/movies/${movie.id}?date=${today}`}
+            className="pointer-events-auto w-fit rounded-md bg-primary px-5 py-2 text-center text-sm font-bold text-primary-foreground shadow-xl transition-all duration-300 translate-y-2 group-hover:translate-y-0 hover:scale-110"
           >
             予約
           </Link>
         </div>
-      </Link>
+      </div>
 
       <div className="flex flex-col gap-1.5 px-0.5">
         <Link

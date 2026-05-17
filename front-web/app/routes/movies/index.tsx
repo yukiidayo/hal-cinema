@@ -1,5 +1,5 @@
 import {useMovies} from "~/features/movie/useMovies"
-import {DateSelector} from "~/features/movie/components/DateSelector"
+import {DateSelector} from "~/widgets/DateSelector"
 import {MovieFilters} from "~/features/movie/components/MovieFilters"
 import {MovieGrid} from "~/features/movie/components/MovieGrid"
 

@@ -1,5 +1,3 @@
-
-
 export type DayInfo = {
   iso: string;
   label: string;
@@ -31,7 +29,7 @@ export function DateSelector({ days, selectedDate, onSelect }: Props) {
                 : "bg-muted/40 hover:bg-muted"
             }`}
           >
-            <span className="text-[10px] font-bold text-muted-foreground">{labelText || "\u00A0"}</span>
+            <span className="text-[10px] font-bold text-muted-foreground">{labelText || "　"}</span>
             <span className={`text-xl font-black ${isActive ? "text-primary" : "text-foreground"}`}>
               {dayNum}
             </span>
