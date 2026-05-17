@@ -21,13 +21,13 @@ export default function MoviesPage() {
         <div className="py-6">
             <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">映画一覧</h1>
+                    <h1 className="text-2xl font-bold text-foreground">映画一覧</h1>
                     {/* 日付ナビ */}
                     <div className="mt-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
                         <button
                             onClick={() => setDate("")}
                             className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                                !selectedDate ? "bg-red-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                !selectedDate ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                             }`}
                         >
                             すべて
@@ -37,7 +37,7 @@ export default function MoviesPage() {
                                 key={d.iso}
                                 onClick={() => setDate(d.iso)}
                                 className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                                    selectedDate === d.iso ? "bg-red-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    selectedDate === d.iso ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                                 }`}
                             >
                                 {d.label}
@@ -48,16 +48,16 @@ export default function MoviesPage() {
 
                 <div className="flex flex-wrap items-center gap-3">
                     {/* 表示モード切り替え */}
-                    <div className="flex rounded-lg bg-gray-100 p-1">
+                    <div className="flex rounded-lg bg-secondary p-1">
                         <button
                             onClick={() => setViewMode("grid")}
-                            className={`rounded-md px-3 py-1 text-xs font-bold transition ${viewMode === "grid" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                            className={`rounded-md px-3 py-1 text-xs font-bold transition ${viewMode === "grid" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             グリッド
                         </button>
                         <button
                             onClick={() => setViewMode("list")}
-                            className={`rounded-md px-3 py-1 text-xs font-bold transition ${viewMode === "list" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                            className={`rounded-md px-3 py-1 text-xs font-bold transition ${viewMode === "list" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             リスト
                         </button>
@@ -67,7 +67,7 @@ export default function MoviesPage() {
                     <select
                         value={sortBy}
                         onChange={(e) => setSort(e.target.value)}
-                        className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-red-500/20"
+                        className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-ring"
                     >
                         <option value="newest">新着順</option>
                         <option value="title">名前順</option>
@@ -83,7 +83,7 @@ export default function MoviesPage() {
                         key={s}
                         onClick={() => setStatus(s)}
                         className={`rounded-full px-4 py-1 text-sm font-medium transition ${
-                            selectedStatus === s ? "bg-gray-800 text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                            selectedStatus === s ? "bg-foreground text-background" : "border border-border text-muted-foreground hover:bg-secondary"
                         }`}
                     >
                         {s === "" ? "すべて" : s === "now_showing" ? "上映中" : "上映予定"}
@@ -93,15 +93,15 @@ export default function MoviesPage() {
 
             {loading && (
                 <div className="flex flex-col items-center py-20">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-600 border-t-transparent"/>
-                    <p className="mt-4 text-sm text-gray-500 font-medium">読み込み中...</p>
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"/>
+                    <p className="mt-4 text-sm text-muted-foreground font-medium">読み込み中...</p>
                 </div>
             )}
-            {error && <div className="rounded-xl bg-red-50 p-4 text-center text-red-600 font-medium">{error}</div>}
+            {error && <div className="rounded-xl bg-red-500/10 p-4 text-center text-red-500 font-medium border border-red-500/20">{error}</div>}
 
             {!loading && !error && movies.length === 0 && (
-                <div className="rounded-2xl border-2 border-dashed border-gray-200 py-20 text-center">
-                    <p className="text-gray-500 font-medium">
+                <div className="rounded-2xl border-2 border-dashed border-border py-20 text-center">
+                    <p className="text-muted-foreground font-medium">
                         {selectedDate ? "選択した日の上映はありません。" : "該当する映画が見つかりません。"}
                     </p>
                 </div>

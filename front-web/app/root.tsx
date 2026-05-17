@@ -43,8 +43,7 @@ export function Layout({children}: { children: React.ReactNode }) {
             <Meta/>
             <Links/>
         </head>
-        <body
-            className="bg-gray-50 min-h-screen text-gray-900 selection:bg-red-100 selection:text-red-900 antialiased flex flex-col">
+        <body className="selection:bg-primary/30 selection:text-primary-foreground antialiased">
         <div className="sticky top-0 z-50 flex flex-col">
             <Header/>
             <HoldTimer/>
