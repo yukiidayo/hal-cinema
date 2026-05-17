@@ -60,5 +60,14 @@ export function useMovies() {
     })
   }
 
-  return { movies, loading, error, days, selectedDate, selectedStatus, sortBy, setDate, setStatus, setSort }
+  function clearAll() {
+    setSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.delete("date")
+      p.delete("status")
+      return p
+    })
+  }
+
+  return { movies, loading, error, days, selectedDate, selectedStatus, sortBy, setDate, setStatus, setSort, clearAll }
 }
