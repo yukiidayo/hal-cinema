@@ -11,8 +11,10 @@ export default function MoviesPage() {
         days,
         selectedDate,
         selectedStatus,
+        view,
         setDate,
         setStatus,
+        setView,
         clearAll,
     } = useMovies()
 
@@ -27,7 +29,9 @@ export default function MoviesPage() {
             <MovieFilters 
                 selectedStatus={selectedStatus} 
                 selectedDate={selectedDate}
+                view={view}
                 onStatusChange={setStatus} 
+                onViewChange={setView}
                 onClearAll={clearAll}
             />
 
@@ -35,6 +39,7 @@ export default function MoviesPage() {
                 movies={movies} 
                 selectedDate={selectedDate} 
                 loading={loading} 
+                view={view}
                 error={error} 
             />
         </div>

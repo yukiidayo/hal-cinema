@@ -1,6 +1,6 @@
 import { Link } from "react-router"
 import type { Movie } from "~/entities/movie/types"
-import { formatJst } from "~/entities/ticket"
+import { formatDateJst, formatTimeJst } from "~/shared/lib/date"
 
 type Props = {
   movie: Movie
@@ -97,24 +97,54 @@ export function MovieListCard({ movie, selectedDate }: Props) {
         </div>
 
         {movie.schedules && movie.schedules.length > 0 ? (
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-            {movie.schedules.map((sch) => (
-              <Link
-                key={sch.scheduleId}
-                to={`/reservations/booking/${movie.id}?date=${selectedDate}&scheduleId=${sch.scheduleId}`}
-                className={`flex flex-col items-center rounded-lg border p-2 transition-all ${
-                  sch.remainingSeats > 0
-                    ? "border-border hover:border-primary hover:bg-primary/10"
-                    : "border-border/50 bg-secondary/30 opacity-50 cursor-not-allowed"
-                }`}
-              >
-                <span className="text-sm font-bold text-foreground">{formatJst(sch.startsAt)}</span>
-                <span className="mt-0.5 text-[10px] text-muted-foreground">
-                  {sch.remainingSeats > 0 ? `残${sch.remainingSeats}席` : "満席"}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <>
+            {selectedDate && (
+              <div className="mb-2 text-xs font-bold text-muted-foreground">
+                {formatDateJst(selectedDate)}
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+              {movie.schedules.map((sch) => {
+                const isFull = sch.remainingSeats <= 0
+                const ratio = sch.remainingSeats / sch.totalSeats
+                let symbol = "□"
+                let symbolColor = "text-green-400"
+                let label = "空席あり"
+
+                if (isFull) {
+                  symbol = "×"
+                  symbolColor = "text-red-400"
+                  label = "満席"
+                } else if (ratio <= 0.3) {
+                  symbol = "△"
+                  symbolColor = "text-yellow-400"
+                  label = "残りわずか"
+                }
+
+                return (
+                  <Link
+                    key={sch.scheduleId}
+                    to={`/reservations/booking/${movie.id}?date=${selectedDate}&scheduleId=${sch.scheduleId}`}
+                    className={`flex flex-col items-center rounded-lg border p-2 transition-all ${
+                      !isFull
+                        ? "border-border hover:border-primary hover:bg-primary/10"
+                        : "border-border/50 bg-secondary/30 opacity-50 cursor-not-allowed pointer-events-none"
+                    }`}
+                  >
+                    <span className="text-[10px] font-bold text-foreground leading-tight">
+                      {formatTimeJst(sch.startsAt)}〜{formatTimeJst(sch.endsAt)}
+                    </span>
+                    <span className="mt-0.5 text-[10px] text-muted-foreground leading-tight">
+                      {sch.screenName}
+                    </span>
+                    <span className={`mt-1 text-[10px] font-bold leading-tight ${symbolColor}`}>
+                      {symbol} {label}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </>
         ) : (
           <p className="mt-auto text-sm text-muted-foreground font-medium italic">
             {selectedDate ? "本日の上映はありません。" : "日付を選択してスケジュールを表示"}

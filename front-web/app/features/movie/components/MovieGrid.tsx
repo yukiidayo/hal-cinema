@@ -1,14 +1,15 @@
 import type { Movie } from "~/entities/movie/types";
-import { MovieGridCard } from "~/widgets/MovieCard";
+import { MovieGridCard, MovieListCard } from "~/widgets/MovieCard";
 
 type Props = {
   movies: Movie[];
   selectedDate: string;
   loading: boolean;
+  view: "grid" | "list";
   error?: string;
 };
 
-export function MovieGrid({ movies, selectedDate, loading, error }: Props) {
+export function MovieGrid({ movies, selectedDate, loading, view, error }: Props) {
   if (loading) {
     return (
       <div className="flex flex-col items-center py-20">
@@ -32,6 +33,16 @@ export function MovieGrid({ movies, selectedDate, loading, error }: Props) {
         <p className="text-muted-foreground font-medium">
           {selectedDate ? "選択した日の上映はありません。" : "該当する映画が見つかりません。"}
         </p>
+      </div>
+    );
+  }
+
+  if (view === "list") {
+    return (
+      <div className="flex flex-col gap-4">
+        {movies.map((movie) => (
+          <MovieListCard key={movie.id} movie={movie} selectedDate={selectedDate} />
+        ))}
       </div>
     );
   }

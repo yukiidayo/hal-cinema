@@ -34,7 +34,7 @@ export function useTicketSelection() {
       return
     }
 
-    setSelectedSeats(d.selectedSeats)
+    setSelectedSeats(d.selectedSeats ?? [])
 
     const init = async () => {
       if (!d.bookingType) {
