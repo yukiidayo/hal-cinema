@@ -18,77 +18,58 @@ export default function MoviesPage() {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
     return (
-        <div className="py-6">
-            <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">映画一覧</h1>
-                    {/* 日付ナビ */}
-                    <div className="mt-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="py-8">
+            {/* 日付ナビ - カード形式 */}
+            <div className="mb-8 flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                {days.map((d, i) => {
+                    const label = i === 0 ? "今日" : i === 1 ? "明日" : "";
+                    const dateObj = new Date(d.iso);
+                    const dayNum = dateObj.getDate();
+                    const weekDay = dateObj.toLocaleDateString("ja-JP", { weekday: "short" });
+                    
+                    return (
                         <button
-                            onClick={() => setDate("")}
-                            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                                !selectedDate ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                            key={d.iso}
+                            onClick={() => setDate(d.iso)}
+                            className={`flex min-w-[100px] flex-col items-center rounded-lg py-3 transition-all ${
+                                selectedDate === d.iso 
+                                ? "bg-muted ring-1 ring-primary shadow-lg" 
+                                : "bg-muted/40 hover:bg-muted"
                             }`}
                         >
-                            すべて
+                            <span className="text-[10px] font-bold text-muted-foreground">{label || "\u00A0"}</span>
+                            <span className={`text-xl font-black ${selectedDate === d.iso ? "text-primary" : "text-foreground"}`}>
+                                {dayNum}
+                            </span>
+                            <span className="text-[10px] font-bold text-muted-foreground">({weekDay})</span>
                         </button>
-                        {days.map(d => (
-                            <button
-                                key={d.iso}
-                                onClick={() => setDate(d.iso)}
-                                className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                                    selectedDate === d.iso ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-                                }`}
-                            >
-                                {d.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                    {/* 表示モード切り替え */}
-                    <div className="flex rounded-lg bg-secondary p-1">
-                        <button
-                            onClick={() => setViewMode("grid")}
-                            className={`rounded-md px-3 py-1 text-xs font-bold transition ${viewMode === "grid" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                        >
-                            グリッド
-                        </button>
-                        <button
-                            onClick={() => setViewMode("list")}
-                            className={`rounded-md px-3 py-1 text-xs font-bold transition ${viewMode === "list" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                        >
-                            リスト
-                        </button>
-                    </div>
-
-                    {/* ソート */}
-                    <select
-                        value={sortBy}
-                        onChange={(e) => setSort(e.target.value)}
-                        className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-ring"
-                    >
-                        <option value="newest">新着順</option>
-                        <option value="title">名前順</option>
-                        <option value="duration">上映時間順</option>
-                    </select>
-                </div>
+                    );
+                })}
             </div>
 
-            {/* ステータスフィルタ */}
-            <div className="mb-8 flex gap-2">
-                {(["", "now_showing", "coming_soon"] as const).map(s => (
-                    <button
-                        key={s}
-                        onClick={() => setStatus(s)}
-                        className={`rounded-full px-4 py-1 text-sm font-medium transition ${
-                            selectedStatus === s ? "bg-foreground text-background" : "border border-border text-muted-foreground hover:bg-secondary"
-                        }`}
-                    >
-                        {s === "" ? "すべて" : s === "now_showing" ? "上映中" : "上映予定"}
-                    </button>
-                ))}
+            {/* 検索・フィルタバー */}
+            <div className="mb-8 flex items-center gap-4 rounded-xl bg-muted/60 p-4 border border-border">
+                <button
+                    onClick={() => setStatus("")}
+                    className="rounded-md border border-border px-6 py-2 text-sm font-bold text-foreground transition hover:bg-muted"
+                >
+                    すべて
+                </button>
+                
+                <div className="flex-1" />
+
+                <div className="relative flex items-center">
+                    <div className="flex items-center rounded-lg border border-border bg-background px-4 py-2 w-64">
+                        <svg className="mr-2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="検索"
+                            className="bg-transparent text-sm font-bold text-foreground outline-none placeholder:text-muted-foreground w-full"
+                        />
+                    </div>
+                </div>
             </div>
 
             {loading && (

@@ -9,37 +9,55 @@ type Props = {
 
 export function MovieGridCard({ movie, selectedDate }: Props) {
   return (
-    <Link
-      to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
-      className="group block"
-    >
-      <div className="relative aspect-2/3 overflow-hidden rounded-xl bg-secondary shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
+    <div className="group flex flex-col gap-3">
+      <Link
+        to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
+        className="relative aspect-2/3 overflow-hidden rounded-lg bg-muted shadow-lg transition-transform duration-300 group-hover:-translate-y-1"
+      >
         {movie.thumbnailUrl ? (
           <img
             src={movie.thumbnailUrl}
             alt={movie.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="h-full w-full object-cover transition-opacity duration-300 group-hover:opacity-60"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground text-5xl">🎬</div>
         )}
-        <div className="absolute top-2 right-2">
-          <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ${
-              movie.status === "now_showing" ? "bg-green-600/90" : "bg-orange-600/90"
-            }`}
+        
+        {/* Hover Reserve Button */}
+        <div className="absolute inset-0 flex items-end justify-center p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <Link
+            to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
+            className="w-full rounded-md bg-primary py-2 text-center text-sm font-bold text-primary-foreground shadow-xl transition-transform duration-300 translate-y-2 group-hover:translate-y-0"
           >
-            {movie.status === "now_showing" ? "上映中" : "予定"}
+            予約
+          </Link>
+        </div>
+      </Link>
+
+      <div className="flex flex-col gap-1.5 px-0.5">
+        <Link
+          to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
+          className="line-clamp-2 text-sm font-bold leading-tight text-foreground transition-colors hover:text-primary"
+        >
+          {movie.title}
+        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {movie.status === "now_showing" ? (
+            <span className="rounded bg-green-900/40 px-1.5 py-0.5 text-[10px] font-bold text-green-400">
+              上映中
+            </span>
+          ) : (
+            <span className="rounded bg-orange-900/40 px-1.5 py-0.5 text-[10px] font-bold text-orange-400">
+              上映予定
+            </span>
+          )}
+          <span className="text-[10px] font-medium text-muted-foreground">
+            {movie.durationMin}分
           </span>
         </div>
       </div>
-      <div className="mt-3">
-        <h2 className="line-clamp-2 text-sm font-bold leading-tight text-foreground group-hover:text-primary transition-colors">
-          {movie.title}
-        </h2>
-        <p className="mt-1 text-xs text-muted-foreground font-medium">{movie.durationMin}分</p>
-      </div>
-    </Link>
+    </div>
   )
 }
 
