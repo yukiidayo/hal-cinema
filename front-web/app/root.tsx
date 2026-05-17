@@ -12,7 +12,9 @@ import type {Route} from "./+types/root";
 import "~/app.css";
 import {HoldTimer} from "~/widgets/HoldTimer";
 import {Header} from "~/widgets/Header";
+import {DebugTools} from "~/widgets/DebugTools";
 import { AuthContext, getAuthState, type AuthState } from "~/shared/api/auth";
+import { useTheme } from "~/shared/lib/theme";
 
 export const links: Route.LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
@@ -29,6 +31,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({children}: { children: React.ReactNode }) {
     const [auth, setAuth] = useState<AuthState>({ authenticated: false })
+    const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         getAuthState().then(setAuth)
@@ -36,7 +39,7 @@ export function Layout({children}: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ auth, setAuth }}>
-        <html lang="ja">
+        <html lang="ja" data-theme={theme}>
         <head>
             <meta charSet="utf-8"/>
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -48,11 +51,13 @@ export function Layout({children}: { children: React.ReactNode }) {
             <Header/>
             <HoldTimer/>
         </div>
-        <main className="mx-auto w-full max-w-5xl px-4 flex-1">
+        <main className="container-center flex-1">
             <Outlet/>
         </main>
         <ScrollRestoration/>
         <Scripts/>
+
+        <DebugTools theme={theme} toggleTheme={toggleTheme} />
         </body>
         </html>
         </AuthContext.Provider>

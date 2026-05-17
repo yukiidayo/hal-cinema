@@ -19,8 +19,8 @@ export function Header() {
   }
 
   return (
-    <header className="px-10 bg-background/80 backdrop-blur-md border-b border-border z-50 py-4 sticky top-0">
-      <div className="flex items-center justify-between">
+    <header className="bg-background/80 backdrop-blur-md border-b border-border z-50 py-4 sticky top-0">
+      <div className="container-center flex items-center justify-between">
         <Link to="/" className="text-2xl font-black tracking-tighter text-primary">
           {AppConfig.name}
         </Link>

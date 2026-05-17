@@ -80,4 +80,8 @@
   body {
     @apply bg-background text-foreground antialiased min-h-screen flex flex-col font-sans;
   }
+
+  .container-center {
+    @apply mx-auto w-full max-w-5xl px-4;
+  }
 }
