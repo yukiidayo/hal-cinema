@@ -1,10 +1,12 @@
 import {Link} from "react-router"
 import {Button} from "~/shared/ui/Button"
 import {Input} from "~/shared/ui/Input"
-import {TICKET_LABELS, formatJst} from "~/entities/ticket"
+import {formatJst} from "~/entities/ticket"
 import {useReservationDetail} from "~/features/reservation/useReservationDetail"
+import {useAppConfig} from "~/shared/config"
 
 export default function ReservationDetailPage() {
+    const { config } = useAppConfig()
     const {
         detail, notFound, cancelled,
         showCancelModal, setShowCancelModal, closeCancelModal,
@@ -74,13 +76,17 @@ export default function ReservationDetailPage() {
                 <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">座席・券種</h2>
                 <table className="w-full text-sm">
                     <tbody>
-                    {detail.seats.map((s, i) => (
+                    {detail.seats.map((s, i) => {
+                        const t = config?.tickets.find((t) => t.type === s.ticketType)
+                        const label = t?.label ?? s.ticketType
+                        return (
                         <tr key={i} className="border-b border-gray-50 last:border-0">
                             <td className="py-2 font-black text-gray-900">{s.row}-{s.col}</td>
-                            <td className="py-2 text-gray-500">{TICKET_LABELS[s.ticketType as keyof typeof TICKET_LABELS] ?? s.ticketType}</td>
+                            <td className="py-2 text-gray-500">{label}</td>
                             <td className="py-2 text-right font-bold text-gray-900">{s.price.toLocaleString()}円</td>
                         </tr>
-                    ))}
+                        )
+                    })}
                     </tbody>
                 </table>
                 <div className="mt-3 flex justify-between border-t border-gray-100 pt-3 font-black text-gray-900">

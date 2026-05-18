@@ -14,6 +14,7 @@ import {HoldTimer} from "~/widgets/HoldTimer";
 import {DebugTools} from "~/widgets/DebugTools";
 import { AuthContext, getAuthState, type AuthState } from "~/shared/api/auth";
 import { useTheme } from "~/shared/lib/theme";
+import { ConfigProvider } from "~/shared/config";
 
 export const links: Route.LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
@@ -38,6 +39,7 @@ export function Layout({children}: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ auth, setAuth }}>
+        <ConfigProvider>
         <html lang="ja" data-theme={theme}>
         <head>
             <meta charSet="utf-8"/>
@@ -63,6 +65,7 @@ export function Layout({children}: { children: React.ReactNode }) {
         <DebugTools theme={theme} toggleTheme={toggleTheme} />
         </body>
         </html>
+        </ConfigProvider>
         </AuthContext.Provider>
     );
 }

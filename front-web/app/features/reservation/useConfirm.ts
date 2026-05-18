@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { apiFetch, ApiError } from "~/shared/api/client"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
-import { TICKET_PRICES } from "~/entities/ticket"
 
 type ScheduleInfo = {
   scheduleId: number
@@ -24,7 +23,7 @@ export function useConfirm() {
       .catch(() => {})
   }, [state.scheduleId])
 
-  const totalPrice = state.selectedSeats?.reduce((sum, s) => sum + TICKET_PRICES[s.ticketType], 0) ?? 0
+  const totalPrice = state.totalPrice ?? 0
 
   async function submit(): Promise<boolean> {
     if (

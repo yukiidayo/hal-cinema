@@ -1,14 +1,16 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router"
 import { Button } from "~/shared/ui/Button"
-import { TICKET_LABELS, TICKET_PRICES, formatJst } from "~/entities/ticket"
+import { formatJst } from "~/entities/ticket"
 import { useConfirm } from "~/features/reservation/useConfirm"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
+import { useAppConfig } from "~/shared/config"
 
 export default function ConfirmPage() {
   const navigate = useNavigate()
   const { canProceedTo } = useReservationFlow()
   const { schedInfo, customer, seats, card, totalPrice, submitting, error, submit } = useConfirm()
+  const { config } = useAppConfig()
 
   useEffect(() => {
     const result = canProceedTo("confirm")
@@ -22,8 +24,13 @@ export default function ConfirmPage() {
 
   const maskedCard = card ? `**** **** **** ${card.cardNo.slice(-4)}` : ""
 
+  function getTicketInfo(type: string) {
+    const t = config?.tickets.find((t) => t.type === type)
+    return { label: t?.label ?? type, price: t?.price ?? 0 }
+  }
+
   return (
-    <div className="py-6">
+    <div className="py-6 max-w-xl mx-auto">
       <h1 className="mb-6 text-2xl font-black text-gray-900">ご予約内容の確認</h1>
       <p className="mb-6 text-sm text-gray-500">以下の内容をご確認の上、「予約を確定する」を押してください。</p>
 
@@ -42,17 +49,20 @@ export default function ConfirmPage() {
           <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <p className="mb-3 text-xs font-bold text-gray-400 uppercase">座席・券種</p>
             <div className="flex flex-col gap-2">
-              {seats.map(seat => (
-                <div key={seat.seatId} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-[10px] font-black text-white">
-                      {seat.row}-{seat.col}
-                    </span>
-                    <span className="font-bold text-gray-700">{TICKET_LABELS[seat.ticketType]}</span>
+              {seats.map(seat => {
+                const info = getTicketInfo(seat.ticketType)
+                return (
+                  <div key={seat.seatId} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-[10px] font-black text-white">
+                        {seat.row}-{seat.col}
+                      </span>
+                      <span className="font-bold text-gray-700">{info.label}</span>
+                    </div>
+                    <span className="font-bold text-gray-900">{info.price.toLocaleString()}円</span>
                   </div>
-                  <span className="font-bold text-gray-900">{TICKET_PRICES[seat.ticketType].toLocaleString()}円</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </section>
         )}

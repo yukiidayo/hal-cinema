@@ -51,7 +51,7 @@ export default function BookingPage() {
                   schedules={schedules}
                   movieId={movie.id}
                   selectedDate={selectedDate}
-                  selectedScheduleId={selectedScheduleId}
+                  selectedScheduleId={selectedScheduleId ?? undefined}
                   onSelect={setSelectedScheduleId}
                 />
               )

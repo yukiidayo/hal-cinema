@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { apiFetch } from "~/shared/api/client"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
-import { calcTotalPrice, type TicketType } from "~/entities/ticket"
+import type { TicketType } from "~/entities/ticket"
 import type { SelectedSeat } from "~/entities/reservation/draft"
 
 export function useTicketSelection() {
@@ -20,7 +20,7 @@ export function useTicketSelection() {
       body: JSON.stringify({ scheduleId: state.scheduleId, ticketCounts: counts }),
     })
       .then(d => setTotalPrice(d.totalPrice))
-      .catch(() => setTotalPrice(calcTotalPrice(counts)))
+      .catch(() => {})
       .finally(() => setQuoting(false))
   }, [seats])
 
@@ -29,7 +29,7 @@ export function useTicketSelection() {
   }
 
   function submit() {
-    setTickets(seats, countByType(seats))
+    setTickets(seats, countByType(seats), totalPrice)
   }
 
   return { seats, totalPrice, quoting, updateSeatTicketType, submit }

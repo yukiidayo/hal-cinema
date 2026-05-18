@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router"
 import { Button } from "~/shared/ui/Button"
-import { TICKET_TYPES, TICKET_LABELS, TICKET_PRICES, formatJst } from "~/entities/ticket"
+import { formatJst } from "~/entities/ticket"
 import { useTicketSelection } from "~/features/reservation/useTicketSelection"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
 import { apiFetch } from "~/shared/api/client"
+import { useAppConfig } from "~/shared/config"
 
 type ScheduleInfo = {
   scheduleId: number
@@ -20,6 +21,7 @@ export default function TicketsPage() {
   const { seats, totalPrice, quoting, updateSeatTicketType, submit } = useTicketSelection()
   const [info, setInfo] = useState<ScheduleInfo | null>(null)
   const [loading, setLoading] = useState(true)
+  const { config } = useAppConfig()
 
   useEffect(() => {
     const result = canProceedTo("tickets")
@@ -75,17 +77,17 @@ export default function TicketsPage() {
               </div>
             </div>
             <div className="flex flex-1 gap-2 sm:max-w-xs">
-              {TICKET_TYPES.map(type => (
+              {config?.tickets.map(t => (
                 <button
-                  key={type}
-                  onClick={() => updateSeatTicketType(seat.seatId, type)}
+                  key={t.type}
+                  onClick={() => updateSeatTicketType(seat.seatId, t.type as any)}
                   className={`flex-1 rounded-lg border-2 py-2 text-[10px] font-black transition-all ${
-                    seat.ticketType === type
+                    seat.ticketType === t.type
                       ? "border-red-600 bg-red-50 text-red-700"
                       : "border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200"
                   }`}
                 >
-                  {TICKET_LABELS[type]}<br />{TICKET_PRICES[type].toLocaleString()}円
+                  {t.label}<br />{t.price.toLocaleString()}円
                 </button>
               ))}
             </div>

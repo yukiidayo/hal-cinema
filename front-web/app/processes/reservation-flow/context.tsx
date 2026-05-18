@@ -31,7 +31,7 @@ type ContextValue = {
   }) => void
   setBookingType: (type: "member" | "guest") => void
   setCustomer: (customer: { email: string }) => void
-  setTickets: (seats: SelectedSeat[], counts: TicketCounts) => void
+  setTickets: (seats: SelectedSeat[], counts: TicketCounts, totalPrice: number) => void
   setPaymentCard: (card: { cardNo: string; expiry: string; cvv: string }) => void
   completeFlow: (result: {
     reservationId: number
@@ -80,7 +80,7 @@ export function ReservationFlowProvider({ children }: { children: ReactNode }) {
   )
 
   const setTickets = useCallback(
-    (seats: SelectedSeat[], counts: TicketCounts) => update({ selectedSeats: seats, ticketCounts: counts }),
+    (seats: SelectedSeat[], counts: TicketCounts, totalPrice: number) => update({ selectedSeats: seats, ticketCounts: counts, totalPrice }),
     [update],
   )
 

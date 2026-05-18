@@ -12,6 +12,7 @@ export type ReservationFlowState = {
   bookingType?: "member" | "guest"
   customer?: { email: string }
   ticketCounts?: TicketCounts
+  totalPrice?: number
   paymentCard?: { cardNo: string; expiry: string; cvv: string }
 }
 
