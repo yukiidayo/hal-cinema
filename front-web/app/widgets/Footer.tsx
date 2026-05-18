@@ -29,7 +29,7 @@ export function Footer() {
             <div>
               <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Booking</p>
               <ul className="space-y-3">
-                {["上映スケジュール","作品一覧","演劇公演","団体予約"].map(label => (
+                {["上映スケジュール","作品一覧","演劇公演"].map(label => (
                   <li key={label}>
                     <Link to="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</Link>
                   </li>
@@ -42,8 +42,6 @@ export function Footer() {
               <ul className="space-y-3">
                 <li><Link to="/shop" className="text-sm text-muted-foreground hover:text-foreground transition-colors">フード・ドリンク</Link></li>
                 <li><Link to="/goods" className="text-sm text-muted-foreground hover:text-foreground transition-colors">グッズ</Link></li>
-                <li><Link to="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">ギフト券</Link></li>
-                <li><Link to="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">アプリ</Link></li>
               </ul>
             </div>
             {/* ABOUT */}

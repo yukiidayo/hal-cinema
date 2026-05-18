@@ -11,9 +11,11 @@ export default function MoviesPage() {
         days,
         selectedDate,
         selectedStatus,
+        sortBy,
         view,
         setDate,
         setStatus,
+        setSort,
         setView,
         clearAll,
     } = useMovies()
@@ -29,8 +31,10 @@ export default function MoviesPage() {
             <MovieFilters 
                 selectedStatus={selectedStatus} 
                 selectedDate={selectedDate}
+                sortBy={sortBy}
                 view={view}
                 onStatusChange={setStatus} 
+                onSortChange={setSort}
                 onViewChange={setView}
                 onClearAll={clearAll}
             />

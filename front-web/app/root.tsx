@@ -46,13 +46,13 @@ export function Layout({children}: { children: React.ReactNode }) {
             <Links/>
         </head>
         <body className="selection:bg-primary/30 selection:text-primary-foreground antialiased">
-        <div className="sticky top-0 z-50 flex flex-col">
-            <HoldTimer/>
+        {/* HoldTimer: 予約保留中に全ページで表示 */}
+        <div className="fixed inset-x-0 top-16 z-[60]">
+            <HoldTimer />
         </div>
-        <Outlet/>
+        <Outlet />
         <ScrollRestoration/>
         <Scripts/>
-
         <DebugTools theme={theme} toggleTheme={toggleTheme} />
         </body>
         </html>

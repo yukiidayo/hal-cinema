@@ -1,6 +1,8 @@
 import { Link } from "react-router"
 import type { Movie } from "~/entities/movie/types"
-import { formatDateJst, formatTimeJst, todayJst } from "~/shared/lib/date"
+import { formatDateJst, todayJst } from "~/shared/lib/date"
+import { proxyImageUrl } from "~/shared/lib/image"
+import { ScheduleGrid } from "./ScheduleGrid"
 
 type Props = {
   movie: Movie
@@ -20,7 +22,7 @@ export function MovieGridCard({ movie, selectedDate }: Props) {
         >
           {movie.thumbnailUrl ? (
             <img
-              src={movie.thumbnailUrl}
+              src={proxyImageUrl(movie.thumbnailUrl)}
               alt={movie.title}
               className="h-full w-full object-cover transition-opacity duration-300 group-hover:opacity-60"
             />
@@ -75,7 +77,7 @@ export function MovieListCard({ movie, selectedDate }: Props) {
       >
         <div className="aspect-2/3 sm:aspect-auto sm:h-full bg-secondary">
           {movie.thumbnailUrl ? (
-            <img src={movie.thumbnailUrl} alt={movie.title} className="h-full w-full object-cover" />
+            <img src={proxyImageUrl(movie.thumbnailUrl)} alt={movie.title} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground text-4xl">🎬</div>
           )}
@@ -108,47 +110,7 @@ export function MovieListCard({ movie, selectedDate }: Props) {
                 {formatDateJst(selectedDate)}
               </div>
             )}
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-              {movie.schedules.map((sch) => {
-                const isFull = sch.remainingSeats <= 0
-                const ratio = sch.remainingSeats / sch.totalSeats
-                let symbol = "□"
-                let symbolColor = "text-green-400"
-                let label = "空席あり"
-
-                if (isFull) {
-                  symbol = "×"
-                  symbolColor = "text-red-400"
-                  label = "満席"
-                } else if (ratio <= 0.3) {
-                  symbol = "△"
-                  symbolColor = "text-yellow-400"
-                  label = "残りわずか"
-                }
-
-                return (
-                  <Link
-                    key={sch.scheduleId}
-                    to={`/reservations/booking/${movie.id}?date=${selectedDate}&scheduleId=${sch.scheduleId}`}
-                    className={`flex flex-col items-center rounded-lg border p-2 transition-all ${
-                      !isFull
-                        ? "border-border hover:border-primary hover:bg-primary/10"
-                        : "border-border/50 bg-secondary/30 opacity-50 cursor-not-allowed pointer-events-none"
-                    }`}
-                  >
-                    <span className="text-[10px] font-bold text-foreground leading-tight">
-                      {formatTimeJst(sch.startsAt)}〜{formatTimeJst(sch.endsAt)}
-                    </span>
-                    <span className="mt-0.5 text-[10px] text-muted-foreground leading-tight">
-                      {sch.screenName}
-                    </span>
-                    <span className={`mt-1 text-[10px] font-bold leading-tight ${symbolColor}`}>
-                      {symbol} {label}
-                    </span>
-                  </Link>
-                )
-              })}
-            </div>
+            <ScheduleGrid schedules={movie.schedules} movieId={movie.id} selectedDate={selectedDate} />
           </>
         ) : (
           <p className="mt-auto text-sm text-muted-foreground font-medium italic">
