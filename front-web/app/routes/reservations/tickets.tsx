@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router"
-import { Button } from "~/shared/ui/Button"
 import { formatJst } from "~/entities/ticket"
 import { useTicketSelection } from "~/features/reservation/useTicketSelection"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
 import { apiFetch } from "~/shared/api/client"
 import { useAppConfig } from "~/shared/config"
 import { MovieHeroBanner } from "~/widgets/MovieHeroBanner"
+import { ReservationActionBar } from "~/widgets/ReservationActionBar"
 
 type ScheduleInfo = {
   scheduleId: number
@@ -102,33 +102,12 @@ export default function TicketsPage() {
         ))}
       </div>
 
-      <div className="sticky bottom-6 mt-10 w-fit mx-auto flex items-center gap-4 rounded-app bg-secondary px-5 py-3 shadow-2xl border border-border">
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1.5">
-            {Array.from({ length: 6 }).map((_, i) => {
-              const seat = seats[i]
-              return (
-                <div
-                  key={i}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-[9px] font-black ${
-                    seat ? "bg-foreground text-background" : "bg-border/30 text-transparent"
-                  }`}
-                >
-                  {seat ? `${seat.row}-${seat.col}` : ""}
-                </div>
-              )
-            })}
-          </div>
-          <div className="h-8 border-l border-border/50 mx-1" />
-          <div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">合計金額</p>
-            <p className="text-xl font-black text-foreground leading-none">{quoting ? "..." : `${totalPrice.toLocaleString()}円`}</p>
-          </div>
-        </div>
-        <Button size="lg" className="px-10 h-10 text-base font-black" onClick={handleNext}>
-          次へ進む
-        </Button>
-      </div>
+      <ReservationActionBar
+        seats={seats.map(s => ({ row: s.row, col: s.col }))}
+        totalPrice={totalPrice}
+        quoting={quoting}
+        onNext={handleNext}
+      />
     </div>
   )
 }

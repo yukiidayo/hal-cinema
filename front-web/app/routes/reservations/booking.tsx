@@ -8,6 +8,7 @@ import { MovieHeroBanner } from "~/widgets/MovieHeroBanner"
 import { getAuthState } from "~/shared/api/auth"
 import { apiFetch } from "~/shared/api/client"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
+import { ReservationActionBar } from "~/widgets/ReservationActionBar"
 
 export default function BookingPage() {
   const navigate = useNavigate()
@@ -96,24 +97,13 @@ export default function BookingPage() {
           )}
 
           {selectedSeatIds.length > 0 && (
-            <div className="sticky bottom-6 mt-10 flex items-center justify-between rounded-app bg-secondary p-6 shadow-2xl border border-border">
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase">選択中の座席</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedSeatIds.map(id => {
-                    const s = mapData?.seats.find(x => x.seatId === id)
-                    return (
-                      <span key={id} className="rounded-md bg-foreground px-3 py-1 text-xs font-black text-background">
-                        {s?.row}-{s?.col}
-                      </span>
-                    )
-                  })}
-                </div>
-              </div>
-              <Button size="lg" className="px-10 h-14 text-lg font-black shadow-lg shadow-primary/20" onClick={handleNext}>
-                次へ進む
-              </Button>
-            </div>
+            <ReservationActionBar
+              seats={selectedSeatIds.map(id => {
+                const s = mapData?.seats.find(x => x.seatId === id)
+                return { row: s?.row ?? "", col: s?.col ?? "" }
+              })}
+              onNext={handleNext}
+            />
           )}
         </div>
       )}
