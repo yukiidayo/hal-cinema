@@ -8,7 +8,7 @@ export default function ReservationLayout() {
     <ReservationFlowProvider>
       <ReservationHeader />
       <ReservationStepBanner />
-      <main className="container-center flex-1">
+      <main className="reservation-container flex-1">
         <Outlet />
       </main>
     </ReservationFlowProvider>

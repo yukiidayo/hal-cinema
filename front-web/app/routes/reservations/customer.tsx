@@ -44,7 +44,7 @@ export default function CustomerPage() {
   }
 
   return (
-    <div className="py-6 max-w-md mx-auto">
+    <div className="py-6">
       <p className="mb-4 text-xs text-gray-400">日付・時間・座席 → お客様情報 → 券種選択 → 決済 → 確認</p>
       <h1 className="mb-6 text-2xl font-bold">お客様情報の入力</h1>
       <form onSubmit={e => { e.preventDefault(); handleNext() }} className="flex flex-col gap-4">

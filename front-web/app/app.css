@@ -84,4 +84,8 @@
   .container-center {
     @apply mx-auto w-full max-w-370 px-4;
   }
+
+  .reservation-container {
+    @apply mx-auto w-full max-w-4xl px-4;
+  }
 }

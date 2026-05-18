@@ -21,7 +21,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="py-6 max-w-xl mx-auto">
+    <div className="py-6">
       <h1 className="mb-6 text-2xl font-black text-gray-900">お支払い情報の入力</h1>
 
       <form onSubmit={handleNext} className="flex flex-col gap-4">

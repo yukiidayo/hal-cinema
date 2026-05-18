@@ -23,7 +23,7 @@ export default function ConfirmPage() {
   const maskedCard = card ? `**** **** **** ${card.cardNo.slice(-4)}` : ""
 
   return (
-    <div className="py-6 max-w-xl mx-auto">
+    <div className="py-6">
       <h1 className="mb-6 text-2xl font-black text-gray-900">ご予約内容の確認</h1>
       <p className="mb-6 text-sm text-gray-500">以下の内容をご確認の上、「予約を確定する」を押してください。</p>
 

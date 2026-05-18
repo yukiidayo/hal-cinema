@@ -6,6 +6,8 @@ type Props = {
   schedules: Schedule[]
   movieId: number
   selectedDate: string
+  selectedScheduleId?: number
+  onSelect?: (scheduleId: number) => void
 }
 
 type Status = "available" | "few" | "full"
@@ -43,24 +45,24 @@ const statusConfig: Record<
   },
 }
 
-export function ScheduleGrid({ schedules, movieId, selectedDate }: Props) {
+export function ScheduleGrid({
+  schedules,
+  movieId,
+  selectedDate,
+  selectedScheduleId,
+  onSelect,
+}: Props) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {schedules.map((sch) => {
         const status = getStatus(sch)
         const cfg = statusConfig[status]
         const isFull = status === "full"
+        const isSelected = sch.scheduleId === selectedScheduleId
         const ariaLabel = `${formatTimeJst(sch.startsAt)}開始 ${sch.screenName} ${cfg.label}${!isFull ? ` 残り${sch.remainingSeats}席` : ""}`
 
-        return (
-          <Link
-            key={sch.scheduleId}
-            to={`/reservations/booking/${movieId}?date=${selectedDate}&scheduleId=${sch.scheduleId}`}
-            className={`flex flex-col items-start rounded-lg border p-3 transition-all ${cfg.cardClass}`}
-            aria-label={ariaLabel}
-            aria-disabled={isFull}
-            tabIndex={isFull ? -1 : undefined}
-          >
+        const content = (
+          <>
             <div className="flex items-baseline gap-1 flex-wrap">
               <span className="text-xl font-black text-foreground leading-none tracking-tight">
                 {formatTimeJst(sch.startsAt)}
@@ -87,6 +89,38 @@ export function ScheduleGrid({ schedules, movieId, selectedDate }: Props) {
                 </span>
               )}
             </div>
+          </>
+        )
+
+        const className = `flex flex-col items-start rounded-lg border p-3 transition-all ${cfg.cardClass} ${
+          isSelected ? "ring-2 ring-primary scale-[1.02] border-primary" : ""
+        }`
+
+        if (onSelect) {
+          return (
+            <button
+              key={sch.scheduleId}
+              type="button"
+              onClick={() => onSelect(sch.scheduleId)}
+              className={className}
+              disabled={isFull}
+              aria-label={ariaLabel}
+            >
+              {content}
+            </button>
+          )
+        }
+
+        return (
+          <Link
+            key={sch.scheduleId}
+            to={`/reservations/booking/${movieId}?date=${selectedDate}&scheduleId=${sch.scheduleId}`}
+            className={className}
+            aria-label={ariaLabel}
+            aria-disabled={isFull}
+            tabIndex={isFull ? -1 : undefined}
+          >
+            {content}
           </Link>
         )
       })}

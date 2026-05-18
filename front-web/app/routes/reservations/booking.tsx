@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router"
 import { Button } from "~/shared/ui/Button"
-import { formatJst } from "~/entities/ticket"
 import { useBooking } from "~/features/reservation/useBooking"
 import { SeatMap } from "~/widgets/SeatMap"
 import { DateSelector } from "~/widgets/DateSelector"
+import { ScheduleGrid } from "~/widgets/ScheduleGrid"
 import { getAuthState } from "~/shared/api/auth"
 
 export default function BookingPage() {
@@ -44,26 +44,17 @@ export default function BookingPage() {
       {selectedDate && (
         <div className="mt-8">
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">2. 時間を選択</h2>
-          <div className="mt-3 flex flex-wrap gap-3">
+          <div className="mt-3">
             {schedules.length > 0 ? (
-              schedules.map(sch => (
-                <button
-                  key={sch.scheduleId}
-                  disabled={sch.remainingSeats === 0}
-                  onClick={() => setSelectedScheduleId(sch.scheduleId)}
-                  className={`flex flex-col items-center rounded-xl border-2 px-6 py-3 transition-all ${
-                    selectedScheduleId === sch.scheduleId
-                      ? "border-primary bg-muted text-primary shadow-lg shadow-primary/10"
-                      : sch.remainingSeats > 0
-                        ? "border-border bg-secondary text-foreground hover:border-primary/50"
-                        : "border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed"
-                  }`}
-                >
-                  <span className="text-lg font-black">{formatJst(sch.startsAt)}</span>
-                  <span className="mt-0.5 text-[10px] font-bold uppercase">{sch.screenName}</span>
-                  <span className="mt-1 text-[10px]">{sch.remainingSeats > 0 ? `残${sch.remainingSeats}席` : "満席"}</span>
-                </button>
-              ))
+              movie && (
+                <ScheduleGrid
+                  schedules={schedules}
+                  movieId={movie.id}
+                  selectedDate={selectedDate}
+                  selectedScheduleId={selectedScheduleId}
+                  onSelect={setSelectedScheduleId}
+                />
+              )
             ) : (
               <p className="text-sm text-muted-foreground italic">この日の上映予定はありません。</p>
             )}

@@ -6,7 +6,7 @@ export default function CompletePage() {
   const { result } = useComplete()
 
   return (
-    <div className="py-12 max-w-md mx-auto text-center">
+    <div className="py-12 text-center">
       <div className="mb-4 text-5xl">🎉</div>
       <h1 className="mb-2 text-2xl font-bold">予約完了</h1>
       <p className="mb-8 text-sm text-gray-500">

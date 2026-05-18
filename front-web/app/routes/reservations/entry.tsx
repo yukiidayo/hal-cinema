@@ -20,7 +20,7 @@ export default function EntryPage() {
   }
 
   return (
-    <div className="py-12 max-w-xl mx-auto px-4">
+    <div className="py-12">
       <div className="text-center mb-10">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Step 2 / 5</p>
         <h1 className="text-3xl font-black tracking-tight">予約方法の選択</h1>
