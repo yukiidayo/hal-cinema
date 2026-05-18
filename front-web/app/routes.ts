@@ -15,6 +15,7 @@ export default [
     route("/contact", "routes/contact.tsx"),
     route("/shop", "routes/shop.tsx"),
     route("/goods", "routes/goods.tsx"),
+    route("/cart", "routes/cart.tsx"),
 
     // 予約詳細
     route("/reservations/lookup", "routes/reservations/lookup.tsx"),

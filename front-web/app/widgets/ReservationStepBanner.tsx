@@ -1,13 +1,12 @@
 import { useLocation } from 'react-router'
 
 const STEPS = [
-  { id: 'booking', label: '座席選択', path: '/reservations/booking' },
-  { id: 'entry', label: 'ログイン', path: '/reservations/entry' },
-  { id: 'customer', label: 'お客様情報', path: '/reservations/customer' },
-  { id: 'tickets', label: '券種選択', path: '/reservations/tickets' },
-  { id: 'confirm', label: '予約確認', path: '/reservations/confirm' },
-  { id: 'payment', label: 'お支払い', path: '/reservations/payment' },
-  { id: 'complete', label: '完了', path: '/reservations/complete' },
+  { id: 'booking', label: '座席選択', paths: ['/reservations/booking'] },
+  { id: 'customer', label: 'お客様情報', paths: ['/reservations/entry', '/reservations/customer'] },
+  { id: 'tickets', label: '券種選択', paths: ['/reservations/tickets'] },
+  { id: 'confirm', label: '予約確認', paths: ['/reservations/confirm'] },
+  { id: 'payment', label: 'お支払い', paths: ['/reservations/payment'] },
+  { id: 'complete', label: '完了', paths: ['/reservations/complete'] },
 ] as const
 
 function CheckIcon({ className }: { className?: string }) {
@@ -37,7 +36,7 @@ export function ReservationStepBanner() {
     if (step.id === 'booking') {
       return pathname.startsWith('/reservations/booking')
     }
-    return pathname === step.path
+    return step.paths.some((p) => pathname === p)
   })
 
   // Do not show banner on complete step or if path doesn't match

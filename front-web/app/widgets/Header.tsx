@@ -77,6 +77,7 @@ export function Header() {
     { to: "/movies", label: "映画一覧" },
     { to: "/shop", label: "ショップ" },
     { to: "/goods", label: "グッズ" },
+    { to: "/cart", label: "カート" },
     { to: "/reservations/lookup", label: "予約確認" },
   ]
 
@@ -99,17 +100,6 @@ export function Header() {
                 {label}
               </Link>
             ))}
-
-            <div className="h-4 w-px bg-border" />
-
-            <button className="relative text-muted-foreground hover:text-foreground transition-colors">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                0
-              </span>
-            </button>
 
             <div className="h-4 w-px bg-border" />
 

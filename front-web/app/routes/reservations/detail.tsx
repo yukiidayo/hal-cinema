@@ -91,8 +91,6 @@ export default function ReservationDetailPage() {
             <section className="mb-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                 <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">お客様情報</h2>
                 <p className="text-sm text-gray-700"><span
-                    className="font-bold text-gray-400">氏名</span> {detail.customer.name}</p>
-                <p className="mt-2 text-sm text-gray-700"><span
                     className="font-bold text-gray-400">メール</span> {detail.customer.maskedEmail}</p>
             </section>
 

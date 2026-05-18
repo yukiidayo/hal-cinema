@@ -153,7 +153,7 @@ export async function getReservationDetail(code: string) {
       price: s.price as number,
     })),
     totalPrice: r.total_price as number,
-    customer: { name: r.customer_name as string, maskedEmail: maskEmail(r.customer_email as string) },
+    customer: { maskedEmail: maskEmail(r.customer_email as string) },
     qrCodeUrl: r.status === 'confirmed' ? getQrCodeUrl(r.reservation_code as string) : null,
   }
 }
@@ -279,7 +279,7 @@ export async function finalizeReservation(params: {
   scheduleId: number
   memberId: number | null
   bookingType: 'member' | 'guest'
-  customer: { name: string; email: string }
+  customer: { email: string }
   tickets: { seatId: number; ticketType: TicketType }[]
 }): Promise<{ reservationId: number; reservationCode: string; totalPrice: number }> {
   const { reservationCode, scheduleId, memberId, bookingType, customer, tickets } = params
@@ -319,9 +319,9 @@ export async function finalizeReservation(params: {
       await conn.execute(
         `UPDATE reservations
          SET status = 'confirmed', expires_at = NULL, member_id = ?,
-             booking_type = ?, customer_name = ?, customer_email = ?, total_price = ?
+             booking_type = ?, customer_name = NULL, customer_email = ?, total_price = ?
          WHERE id = ?`,
-        [memberId, bookingType, customer.name, customer.email, totalPrice, reservationId],
+        [memberId, bookingType, customer.email, totalPrice, reservationId],
       )
       await conn.execute('DELETE FROM reservation_seats WHERE reservation_id = ?', [reservationId])
     } else {
@@ -338,8 +338,8 @@ export async function finalizeReservation(params: {
       const [resResult] = await conn.execute<mysql.ResultSetHeader>(
         `INSERT INTO reservations
            (reservation_code, schedule_id, member_id, booking_type, customer_name, customer_email, total_price)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [finalReservationCode, scheduleId, memberId, bookingType, customer.name, customer.email, totalPrice],
+         VALUES (?, ?, ?, ?, NULL, ?, ?)`,
+        [finalReservationCode, scheduleId, memberId, bookingType, customer.email, totalPrice],
       )
       reservationId = resResult.insertId
     }
