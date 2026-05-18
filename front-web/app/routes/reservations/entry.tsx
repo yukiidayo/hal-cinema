@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router"
-import { LoginForm } from "~/features/auth/components/LoginForm"
-import { RegisterForm } from "~/features/auth/components/RegisterForm"
+import { useEffect } from "react"
+import { Link, useNavigate } from "react-router"
+import { Button } from "~/shared/ui/Button"
 import { useEntry } from "~/features/reservation/useEntry"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
 
@@ -9,7 +8,6 @@ export default function EntryPage() {
   const navigate = useNavigate()
   const { canProceedTo } = useReservationFlow()
   const { selectGuest } = useEntry()
-  const [mode, setMode] = useState<"login" | "register">("login")
 
   useEffect(() => {
     const result = canProceedTo("entry")
@@ -29,33 +27,13 @@ export default function EntryPage() {
         <p className="mt-2 text-sm text-muted-foreground">会員の方はログインすると、スムーズに予約いただけます。</p>
       </div>
 
-      <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="flex border-b border-border bg-muted/30">
-          <button
-            onClick={() => setMode("login")}
-            className={`flex-1 py-4 text-sm font-bold transition-all ${mode === "login" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-          >
-            ログイン
-          </button>
-          <button
-            onClick={() => setMode("register")}
-            className={`flex-1 py-4 text-sm font-bold transition-all ${mode === "register" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-          >
-            新規会員登録
-          </button>
-        </div>
-
-        <div className="p-8">
-          {mode === "login" ? (
-            <LoginForm onGuestContinue={handleGuest} />
-          ) : (
-            <RegisterForm />
-          )}
-        </div>
-
-        <div className="border-t border-border bg-muted/10 p-6 text-center">
-          <p className="text-xs text-muted-foreground">※会員登録すると予約の確認・キャンセルがより簡単になります。</p>
-        </div>
+      <div className="rounded-3xl border border-border bg-card shadow-sm p-8 flex flex-col gap-4">
+        <Link to="/login?redirect=/reservations/customer">
+          <Button size="lg" className="w-full">ログインして予約</Button>
+        </Link>
+        <Link to="/register?redirect=/reservations/customer">
+          <Button size="lg" variant="secondary" className="w-full">新規会員登録して予約</Button>
+        </Link>
       </div>
 
       <div className="mt-8 text-center">
