@@ -38,6 +38,17 @@ export function Header() {
 
           <div className="h-4 w-px bg-border" />
 
+          <button className="relative text-muted-foreground hover:text-foreground transition-colors">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              0
+            </span>
+          </button>
+
+          <div className="h-4 w-px bg-border" />
+
           {auth.authenticated ? (
             <div className="flex items-center gap-4">
               <Link to="/member/reservations" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">

@@ -2,59 +2,93 @@ import type { Route } from "./+types/goods"
 
 export function meta(_: Route.MetaArgs) {
   return [
-    { title: "グッズ | HALシネマ" },
+    { title: "グッズショップ | HALシネマ" },
     { name: "description", content: "映画関連グッズ・オリジナルアイテム" },
   ]
 }
 
-const GOODS_ITEMS = [
-  { name: "パンフレット", price: "￥800", description: "上映作品のメイキングや解説が充実。", tag: "Recommend" },
-  { name: "クリアファイルセット", price: "￥600", description: "オリジナルデザインの2枚組セット。", tag: "New" },
-  { name: "ポスターカレンダー", price: "￥1,200", description: "名シーンを収めた2026年度版カレンダー。", tag: "Limited" },
-  { name: "シネマトートバッグ", price: "￥1,800", description: "丈夫なキャンバス地のオリジナルバッグ。", tag: "Recommend" },
-]
+const SAMPLE_ITEM = {
+  title: "商品名",
+  movie: "作品名",
+  price: "2,000",
+  isSoldOut: true,
+  isNew: true
+}
 
 export default function Goods() {
+  const items = Array(12).fill(SAMPLE_ITEM);
+
   return (
-    <div className="py-16">
-      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black mb-4">グッズショップ</h1>
-          <p className="text-muted-foreground">
-            ここでしか手に入らない限定アイテムや公式パンフレット。
-          </p>
+    <div className="pb-16">
+      {/* カルーセルセクション (プレースホルダー) */}
+      <div className="relative mb-12 pt-8">
+        <div className="flex items-center justify-center gap-4 px-4 overflow-hidden">
+          <button className="h-12 w-8 shrink-0 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          
+          <div className="flex gap-4 overflow-hidden">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`h-40 w-80 shrink-0 rounded-lg bg-zinc-800 ${i !== 2 ? 'opacity-50 scale-90' : ''}`} />
+            ))}
+          </div>
+
+          <button className="h-12 w-8 shrink-0 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </button>
         </div>
-        <div className="text-sm font-bold text-primary bg-primary/10 px-4 py-2 rounded-full">
-          オンラインストアCOMING SOON
+        
+        <div className="mt-6 flex justify-center gap-2">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`h-2 w-2 rounded-full ${i === 1 ? 'bg-white' : 'bg-zinc-700'}`} />
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {GOODS_ITEMS.map((item) => (
-          <div key={item.name} className="flex gap-6 p-6 rounded-2xl border border-border bg-card hover:bg-accent/50 transition-colors group">
-            <div className="h-32 w-32 shrink-0 rounded-xl bg-muted flex items-center justify-center text-4xl group-hover:scale-105 transition-transform">
-              🖼️
-            </div>
-            <div className="flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/20 text-primary uppercase tracking-tighter">
-                    {item.tag}
+      <div className="container-center">
+        {/* フィルタバー */}
+        <div className="mb-12 flex items-center justify-between rounded-xl bg-zinc-900/50 p-4 border border-zinc-800">
+          <div className="flex-1" />
+          <button className="flex items-center gap-2 text-sm font-bold hover:text-primary transition-colors">
+            <span>映画ごとに絞り込む</span>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* 商品グリッド */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+          {items.map((item, i) => (
+            <div key={i} className="group cursor-pointer">
+              <div className="relative aspect-square mb-3 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-800 transition-all group-hover:border-zinc-700">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-zinc-600 text-6xl">🖼️</span>
+                </div>
+                
+                {item.isSoldOut && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60">
+                    <span className="text-sm font-black text-white tracking-widest -rotate-12 border-2 border-white px-2 py-1">SOLD OUT</span>
+                  </div>
+                )}
+                
+                {item.isNew && i === 0 && (
+                  <span className="absolute bottom-2 right-2 z-20 text-[10px] font-black text-white tracking-tighter">NEW</span>
+                )}
+              </div>
+              
+              <div className="space-y-1">
+                <div className="text-[10px] font-bold text-zinc-500">{item.movie}</div>
+                <div className="text-sm font-bold leading-tight group-hover:text-primary transition-colors">{item.title}</div>
+                <div className="pt-1">
+                  <span className="inline-flex items-center rounded-full bg-zinc-800 px-3 py-1 text-[11px] font-black text-zinc-300">
+                    ¥{item.price}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold mb-1">{item.name}</h3>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
-              <div className="text-lg font-black">{item.price}</div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-16 text-center">
-        <p className="text-sm text-muted-foreground">
-          ※商品の在庫状況は劇場により異なります。品切れの際はご容赦ください。
-        </p>
+          ))}
+        </div>
       </div>
     </div>
   )

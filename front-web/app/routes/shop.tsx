@@ -2,50 +2,94 @@ import type { Route } from "./+types/shop"
 
 export function meta(_: Route.MetaArgs) {
   return [
-    { title: "ショップ | HALシネマ" },
-    { name: "description", content: "HALシネマのフード＆ドリンクメニュー" },
+    { title: "フード＆ドリンク | HALシネマ" },
+    { name: "description", content: "シアター内で楽しめるフード＆ドリンクメニュー" },
   ]
 }
 
-const MENU_ITEMS = [
-  { name: "塩ポップコーン", price: "￥500", category: "Popcorn", icon: "🍿" },
-  { name: "キャラメルポップコーン", price: "￥600", category: "Popcorn", icon: "🍿" },
-  { name: "コカ・コーラ", price: "￥350", category: "Drink", icon: "🥤" },
-  { name: "ホットドッグ", price: "￥550", category: "Food", icon: "🌭" },
-  { name: "チュリトス", price: "￥450", category: "Food", icon: "🥨" },
-  { name: "プレミアムビール", price: "￥700", category: "Drink", icon: "🍺" },
-]
+const SAMPLE_MENU = {
+  title: "メニュー名",
+  category: "カテゴリー",
+  price: "500",
+  isSoldOut: false,
+}
 
 export default function Shop() {
+  const items = Array(12).fill(SAMPLE_MENU);
+
   return (
-    <div className="py-16">
-      <div className="mb-12">
-        <h1 className="text-3xl font-black mb-4">フード＆ドリンク</h1>
-        <p className="text-muted-foreground">
-          映画鑑賞をさらに楽しく。こだわりのフードとドリンクをご用意しています。
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MENU_ITEMS.map((item) => (
-          <div key={item.name} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5">
-            <div className="mb-4 text-4xl">{item.icon}</div>
-            <div className="mb-1 text-xs font-bold uppercase tracking-widest text-primary/60">{item.category}</div>
-            <h3 className="text-lg font-bold mb-2">{item.name}</h3>
-            <div className="text-xl font-black">{item.price}</div>
-            <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-xs font-bold">+</span>
-            </div>
+    <div className="pb-16">
+      {/* カルーセルセクション (プレースホルダー) */}
+      <div className="relative mb-12 pt-8">
+        <div className="flex items-center justify-center gap-4 px-4 overflow-hidden">
+          <button className="h-12 w-8 shrink-0 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          
+          <div className="flex gap-4 overflow-hidden">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`h-40 w-80 shrink-0 rounded-lg bg-zinc-800 ${i !== 2 ? 'opacity-50 scale-90' : ''}`} />
+            ))}
           </div>
-        ))}
+
+          <button className="h-12 w-8 shrink-0 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
+        
+        <div className="mt-6 flex justify-center gap-2">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`h-2 w-2 rounded-full ${i === 1 ? 'bg-white' : 'bg-zinc-700'}`} />
+          ))}
+        </div>
       </div>
 
-      <div className="mt-16 p-8 rounded-2xl bg-primary/5 border border-primary/10">
-        <h2 className="text-xl font-bold mb-4">モバイルオーダーのご案内</h2>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          HALシネマ公式アプリから、事前にフード・ドリンクを注文いただけます。
-          行列に並ばず、指定の時間にカウンターで受け取るだけ。スマートな映画体験を。
-        </p>
+      <div className="container-center">
+        {/* フィルタバー */}
+        <div className="mb-12 flex items-center justify-between rounded-xl bg-zinc-900/50 p-4 border border-zinc-800">
+          <div className="flex gap-2">
+            {["すべて", "フード", "ドリンク", "セット"].map((cat) => (
+              <button key={cat} className={`rounded-md px-4 py-1.5 text-xs font-bold border transition ${cat === 'すべて' ? 'bg-primary border-primary text-primary-foreground' : 'border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}>
+                {cat}
+              </button>
+            ))}
+          </div>
+          <button className="flex items-center gap-2 text-sm font-bold hover:text-primary transition-colors">
+            <span>並び替え</span>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* メニューグリッド */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+          {items.map((item, i) => (
+            <div key={i} className="group cursor-pointer">
+              <div className="relative aspect-square mb-3 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-800 transition-all group-hover:border-zinc-700">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-zinc-600 text-6xl">{i % 3 === 0 ? '🍿' : i % 3 === 1 ? '🥤' : '🌭'}</span>
+                </div>
+                
+                {item.isSoldOut && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60">
+                    <span className="text-sm font-black text-white tracking-widest -rotate-12 border-2 border-white px-2 py-1">SOLD OUT</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-1">
+                <div className="text-[10px] font-bold text-zinc-500">{item.category}</div>
+                <div className="text-sm font-bold leading-tight group-hover:text-primary transition-colors">{item.title}</div>
+                <div className="pt-1">
+                  <span className="inline-flex items-center rounded-full bg-zinc-800 px-3 py-1 text-[11px] font-black text-zinc-300">
+                    ¥{item.price}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
