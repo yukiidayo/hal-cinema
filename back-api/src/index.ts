@@ -1,6 +1,7 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { csrf } from 'hono/csrf'
 import type { AppEnv } from '#types.js'
 import { requestIdMiddleware } from '#middleware/requestId.js'
 import { sessionMiddleware } from '#middleware/session.js'
@@ -23,6 +24,7 @@ app.use(
   }),
 )
 
+app.use('/api/*', csrf())
 app.use('/api/*', requestIdMiddleware)
 app.use('/api/*', sessionMiddleware)
 app.use('/api/*', auditLogMiddleware)

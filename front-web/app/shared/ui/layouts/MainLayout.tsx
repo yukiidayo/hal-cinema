@@ -16,11 +16,8 @@ export default function MainLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      {/* 場所確保: ヘッダー高さ分（表示とは独立） */}
-      <div className="h-16 shrink-0" aria-hidden="true" />
-
-      {/* ヘッダー表示: viewport 固定 */}
-      <div className="fixed inset-x-0 top-0 z-50">
+      {/* ヘッダー: stickyにすることで動的な高さ（仮予約バナー等）に対応 */}
+      <div className="sticky top-0 z-50">
         <Header />
       </div>
 

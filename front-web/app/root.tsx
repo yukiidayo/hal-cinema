@@ -10,7 +10,6 @@ import { useState, useEffect } from "react";
 
 import type {Route} from "./+types/root";
 import "~/app.css";
-import {HoldTimer} from "~/widgets/HoldTimer";
 import {DebugTools} from "~/widgets/DebugTools";
 import { AuthContext, getAuthState, type AuthState } from "~/shared/api/auth";
 import { useTheme } from "~/shared/lib/theme";
@@ -49,16 +48,6 @@ export function Layout({children}: { children: React.ReactNode }) {
             <Links/>
         </head>
         <body className="selection:bg-primary/30 selection:text-primary-foreground antialiased">
-        {/* HoldTimer: 予約保留中に全ページで表示 */}
-        <div
-            className="fixed inset-x-0 z-[60]"
-            style={{
-                top: "calc(env(safe-area-inset-top, 0px) + 4rem)",
-                transform: "translateY(var(--header-scroll-offset, 0px))",
-            }}
-        >
-            <HoldTimer />
-        </div>
         <Outlet />
         <ScrollRestoration/>
         <Scripts/>

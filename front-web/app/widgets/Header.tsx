@@ -4,6 +4,7 @@ import { AppConfig } from "~/shared/config/app"
 import { useAuth } from "~/shared/api/auth"
 import { apiFetch } from "~/shared/api/client"
 import { Button } from "~/shared/ui/Button"
+import { HoldTimer } from "./HoldTimer"
 
 export function Header() {
   const { auth, setAuth } = useAuth()
@@ -140,6 +141,7 @@ export function Header() {
             )}
           </button>
         </div>
+        <HoldTimer />
       </header>
 
       {/* フルスクリーンメニュー（モバイル） */}
