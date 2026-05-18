@@ -1,6 +1,9 @@
-import { Link } from "react-router"
-import { useRef, useState } from "react"
+import { Link, useParams } from "react-router"
+import { useRef, useState, useEffect } from "react"
 import { useSchedules } from "~/features/movie/useSchedules"
+import { apiFetch } from "~/shared/api/client"
+import type { Movie } from "~/entities/movie/types"
+import { MovieGridCard } from "~/widgets/MovieCard"
 import { DateSelector } from "~/widgets/DateSelector"
 import { ScheduleGrid } from "~/widgets/ScheduleGrid"
 import { GoodsCard, type GoodsItem } from "~/widgets/GoodsCard"
@@ -43,9 +46,17 @@ function extractColor(img: HTMLImageElement): { r: number; g: number; b: number 
 }
 
 export default function MovieDetailPage() {
+  const { movieId } = useParams<{ movieId: string }>()
   const { data, loading, error, days, selectedDate, setDate, selectSchedule } = useSchedules()
   const imgRef = useRef<HTMLImageElement>(null)
   const [rgb, setRgb] = useState({ r: 15, g: 15, b: 30 })
+  const [relatedMovies, setRelatedMovies] = useState<Movie[]>([])
+
+  useEffect(() => {
+    apiFetch<{ items: Movie[] }>('/movies')
+      .then(res => setRelatedMovies(res.items.filter(m => m.id !== Number(movieId))))
+      .catch(() => {})
+  }, [movieId])
 
   function handleImageLoad() {
     const img = imgRef.current
@@ -197,12 +208,32 @@ export default function MovieDetailPage() {
             グッズ一覧へ →
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
-          {RELATED_GOODS.map((item, i) => (
-            <GoodsCard key={i} item={item} showNew={item.isNew} />
-          ))}
+        <div className="-mx-4 overflow-x-auto px-4">
+          <div className="flex gap-4 pb-4">
+            {RELATED_GOODS.map((item, i) => (
+              <div key={i} className="w-36 shrink-0 md:w-44">
+                <GoodsCard item={item} showNew={item.isNew} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+
+      {/* 関連映画 */}
+      {relatedMovies.length > 0 && (
+        <section className="mt-16 border-t border-border pt-10">
+          <h2 className="mb-6 text-2xl font-bold text-foreground">関連映画</h2>
+          <div className="-mx-4 overflow-x-auto px-4">
+            <div className="flex gap-4 pb-4">
+              {relatedMovies.map(movie => (
+                <div key={movie.id} className="w-36 shrink-0 md:w-44">
+                  <MovieGridCard movie={movie} selectedDate={selectedDate} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

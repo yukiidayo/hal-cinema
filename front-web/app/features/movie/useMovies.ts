@@ -42,7 +42,7 @@ export function useMovies() {
       const p = new URLSearchParams(prev)
       if (date) p.set("date", date); else p.delete("date")
       return p
-    })
+    }, { preventScrollReset: true })
   }
 
   function setStatus(status: string) {
@@ -50,7 +50,7 @@ export function useMovies() {
       const p = new URLSearchParams(prev)
       if (status) p.set("status", status); else p.delete("status")
       return p
-    })
+    }, { preventScrollReset: true })
   }
 
   function setSort(sort: string) {
@@ -58,7 +58,7 @@ export function useMovies() {
       const p = new URLSearchParams(prev)
       if (sort && sort !== "newest") p.set("sort", sort); else p.delete("sort")
       return p
-    })
+    }, { preventScrollReset: true })
   }
 
   function setView(v: "grid" | "list" | "timetable") {
@@ -67,7 +67,7 @@ export function useMovies() {
       if (v === "grid") p.delete("view")
       else p.set("view", v)
       return p
-    })
+    }, { preventScrollReset: true })
   }
 
   function clearAll() {
@@ -76,7 +76,7 @@ export function useMovies() {
       p.delete("date")
       p.delete("status")
       return p
-    })
+    }, { preventScrollReset: true })
   }
 
   return { movies, loading, error, days, selectedDate, selectedStatus, sortBy, view, setDate, setStatus, setSort, setView, clearAll }

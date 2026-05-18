@@ -41,13 +41,20 @@ export function Layout({children}: { children: React.ReactNode }) {
         <html lang="ja" data-theme={theme}>
         <head>
             <meta charSet="utf-8"/>
-            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
             <Meta/>
             <Links/>
         </head>
         <body className="selection:bg-primary/30 selection:text-primary-foreground antialiased">
         {/* HoldTimer: 予約保留中に全ページで表示 */}
-        <div className="fixed inset-x-0 top-16 z-[60]">
+        <div
+            className="fixed inset-x-0 z-[60]"
+            style={{
+                top: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+                transform: "translateY(var(--header-scroll-offset, 0px))",
+            }}
+        >
             <HoldTimer />
         </div>
         <Outlet />

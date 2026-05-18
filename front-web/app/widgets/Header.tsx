@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router"
 import { AppConfig } from "~/shared/config/app"
 import { useAuth } from "~/shared/api/auth"
@@ -9,10 +9,57 @@ export function Header() {
   const { auth, setAuth } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
+  const offsetRef = useRef(0)
+  const lastYRef = useRef(0)
 
+  // メニュー展開中はbodyスクロール禁止
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
+  }, [menuOpen])
+
+  // スクロール追従 (モバイルのみ・直接DOM操作でRAFなしでも滑らか)
+  useEffect(() => {
+    const header = headerRef.current
+    if (!header) return
+
+    if (menuOpen) {
+      offsetRef.current = 0
+      header.style.transform = ""
+      document.documentElement.style.setProperty("--header-scroll-offset", "0px")
+      return
+    }
+
+    lastYRef.current = window.scrollY
+
+    const onScroll = () => {
+      if (window.innerWidth >= 768) {
+        header.style.transform = ""
+        offsetRef.current = 0
+        document.documentElement.style.setProperty("--header-scroll-offset", "0px")
+        return
+      }
+
+      const currentY = window.scrollY
+      const delta = currentY - lastYRef.current
+      lastYRef.current = currentY
+
+      if (currentY <= 0) {
+        offsetRef.current = 0
+        header.style.transform = ""
+        document.documentElement.style.setProperty("--header-scroll-offset", "0px")
+        return
+      }
+
+      const maxOffset = header.offsetHeight
+      offsetRef.current = Math.max(-maxOffset, Math.min(0, offsetRef.current - delta))
+      header.style.transform = `translateY(${offsetRef.current}px)`
+      document.documentElement.style.setProperty("--header-scroll-offset", `${offsetRef.current}px`)
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [menuOpen])
 
   async function handleLogout() {
@@ -35,8 +82,12 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-background/80 backdrop-blur-md border-b border-border py-4 relative z-50">
-        <div className="container-center flex items-center justify-between">
+      <header
+        ref={headerRef}
+        className="bg-background/80 backdrop-blur-md border-b border-border relative z-50"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="container-center flex items-center justify-between py-4">
           <Link to="/" className="text-2xl font-black tracking-tighter text-primary" onClick={() => setMenuOpen(false)}>
             {AppConfig.name}
           </Link>
@@ -83,7 +134,7 @@ export function Header() {
 
           {/* モバイル: ハンバーガーボタン */}
           <button
-            className="md:hidden text-foreground transition-colors p-1"
+            className="md:hidden text-foreground p-1"
             onClick={() => setMenuOpen(v => !v)}
             aria-label="メニュー"
           >
@@ -102,24 +153,21 @@ export function Header() {
 
       {/* フルスクリーンメニュー（モバイル） */}
       {menuOpen && (
-        <div className="fixed inset-0 z-40 flex flex-col bg-background md:hidden overflow-y-auto">
-          {/* 上部: ロゴ + 閉じるボタン */}
+        <div
+          className="fixed inset-0 z-40 flex flex-col bg-background md:hidden overflow-y-auto"
+          style={{ paddingTop: "env(safe-area-inset-top)" }}
+        >
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
             <Link to="/" className="text-2xl font-black tracking-tighter text-primary" onClick={() => setMenuOpen(false)}>
               {AppConfig.name}
             </Link>
-            <button
-              className="text-foreground p-1"
-              onClick={() => setMenuOpen(false)}
-              aria-label="閉じる"
-            >
+            <button className="text-foreground p-1" onClick={() => setMenuOpen(false)} aria-label="閉じる">
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          {/* メニュー本体 */}
           <nav className="flex flex-1 flex-col px-6 pt-8 gap-2">
             {NAV_LINKS.map(({ to, label }) => (
               <Link
