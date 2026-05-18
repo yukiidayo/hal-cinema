@@ -70,7 +70,7 @@ export function MovieGridCard({ movie, selectedDate }: Props) {
 
 export function MovieListCard({ movie, selectedDate }: Props) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-secondary/50 shadow-sm sm:flex-row">
+    <div className="flex flex-col overflow-hidden rounded-app border border-border bg-secondary/50 shadow-sm sm:flex-row">
       <Link
         to={`/movies/${movie.id}${selectedDate ? `?date=${selectedDate}` : ""}`}
         className="block w-full shrink-0 sm:w-40 md:w-48"

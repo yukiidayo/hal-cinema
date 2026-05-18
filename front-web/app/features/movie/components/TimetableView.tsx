@@ -10,7 +10,7 @@ type Props = {
 export default function TimetableView({ movies, selectedDate }: Props) {
   if (!selectedDate) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-border py-20 text-center">
+      <div className="rounded-app border-2 border-dashed border-border py-20 text-center">
         <p className="text-muted-foreground font-medium">日付を選択してタイムテーブルを表示</p>
       </div>
     );

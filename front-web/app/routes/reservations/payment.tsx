@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, type FormEvent } from "react"
 import { useNavigate } from "react-router"
 import { usePayment } from "~/features/reservation/usePayment"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
@@ -15,7 +15,7 @@ export default function PaymentPage() {
     if (!result.ok) navigate(result.redirectTo, { replace: true })
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  function handleNext(e: FormEvent) {
     e.preventDefault()
     if (submit()) navigate("/reservations/confirm")
   }

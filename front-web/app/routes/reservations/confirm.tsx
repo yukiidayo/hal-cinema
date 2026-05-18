@@ -31,23 +31,23 @@ export default function ConfirmPage() {
 
   return (
     <div className="py-6 max-w-xl mx-auto">
-      <h1 className="mb-6 text-2xl font-black text-gray-900">ご予約内容の確認</h1>
-      <p className="mb-6 text-sm text-gray-500">以下の内容をご確認の上、「予約を確定する」を押してください。</p>
+      <h1 className="mb-6 text-2xl font-black text-foreground">ご予約内容の確認</h1>
+      <p className="mb-6 text-sm text-muted-foreground">以下の内容をご確認の上、「予約を確定する」を押してください。</p>
 
       <div className="flex flex-col gap-4">
         {schedInfo && (
-          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <p className="mb-2 text-xs font-bold text-gray-400 uppercase">上映情報</p>
-            <p className="text-lg font-black text-gray-900">{schedInfo.movieTitle}</p>
-            <p className="mt-1 text-sm font-bold text-gray-500">
+          <section className="rounded-app border border-border bg-card p-5 shadow-sm">
+            <p className="mb-2 text-xs font-bold text-muted-foreground uppercase">上映情報</p>
+            <p className="text-lg font-black text-foreground">{schedInfo.movieTitle}</p>
+            <p className="mt-1 text-sm font-bold text-muted-foreground">
               {formatJst(schedInfo.startsAt)} / {schedInfo.screenName}
             </p>
           </section>
         )}
 
         {seats && seats.length > 0 && (
-          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <p className="mb-3 text-xs font-bold text-gray-400 uppercase">座席・券種</p>
+          <section className="rounded-app border border-border bg-card p-5 shadow-sm">
+            <p className="mb-3 text-xs font-bold text-muted-foreground uppercase">座席・券種</p>
             <div className="flex flex-col gap-2">
               {seats.map(seat => {
                 const info = getTicketInfo(seat.ticketType)
@@ -57,9 +57,9 @@ export default function ConfirmPage() {
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-[10px] font-black text-white">
                         {seat.row}-{seat.col}
                       </span>
-                      <span className="font-bold text-gray-700">{info.label}</span>
+                      <span className="font-bold text-foreground">{info.label}</span>
                     </div>
-                    <span className="font-bold text-gray-900">{info.price.toLocaleString()}円</span>
+                    <span className="font-bold text-foreground">{info.price.toLocaleString()}円</span>
                   </div>
                 )
               })}
@@ -68,23 +68,23 @@ export default function ConfirmPage() {
         )}
 
         {customer && (
-          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <p className="mb-2 text-xs font-bold text-gray-400 uppercase">お客様情報</p>
-            <p className="text-sm font-bold text-gray-700">{customer.email}</p>
+          <section className="rounded-app border border-border bg-card p-5 shadow-sm">
+            <p className="mb-2 text-xs font-bold text-muted-foreground uppercase">お客様情報</p>
+            <p className="text-sm font-bold text-foreground">{customer.email}</p>
           </section>
         )}
 
         {card && (
-          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <p className="mb-2 text-xs font-bold text-gray-400 uppercase">お支払い情報</p>
-            <p className="text-sm font-bold text-gray-700">{maskedCard}</p>
-            <p className="mt-1 text-xs text-gray-400">有効期限: {card.expiry}</p>
+          <section className="rounded-app border border-border bg-card p-5 shadow-sm">
+            <p className="mb-2 text-xs font-bold text-muted-foreground uppercase">お支払い情報</p>
+            <p className="text-sm font-bold text-foreground">{maskedCard}</p>
+            <p className="mt-1 text-xs text-muted-foreground">有効期限: {card.expiry}</p>
           </section>
         )}
 
-        <div className="flex items-center justify-between rounded-2xl border-2 border-gray-900 bg-white px-5 py-4">
-          <span className="text-sm font-bold text-gray-500">合計金額</span>
-          <span className="text-2xl font-black text-gray-900">{totalPrice.toLocaleString()}円</span>
+        <div className="flex items-center justify-between rounded-app border-2 border-foreground bg-card px-5 py-4">
+          <span className="text-sm font-bold text-muted-foreground">合計金額</span>
+          <span className="text-2xl font-black text-foreground">{totalPrice.toLocaleString()}円</span>
         </div>
       </div>
 

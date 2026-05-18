@@ -30,7 +30,7 @@ export function MovieGrid({ movies, selectedDate, loading, view, error }: Props)
 
   if (movies.length === 0) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-border py-20 text-center">
+      <div className="rounded-app border-2 border-dashed border-border py-20 text-center">
         <p className="text-muted-foreground font-medium">
           {selectedDate ? "選択した日の上映はありません。" : "該当する映画が見つかりません。"}
         </p>

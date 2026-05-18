@@ -26,12 +26,12 @@ export function SeatMap({ mapData, mapLoading, selectedSeatIds, toggleSeat }: Pr
       </div>
 
       {mapLoading ? (
-        <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-secondary mt-6">
+        <div className="flex aspect-video w-full items-center justify-center rounded-app bg-secondary mt-6">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
         </div>
       ) : (
         <div
-          className="relative mx-auto mt-6 w-full max-w-2xl overflow-hidden rounded-2xl bg-secondary p-8 shadow-2xl"
+          className="relative mx-auto mt-6 w-full max-w-2xl overflow-hidden rounded-app bg-secondary p-8 shadow-2xl"
           style={{ aspectRatio: mapData.layout.aspectRatio.replace("/", " / ") }}
         >
           <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-muted px-10 py-1 text-[10px] font-black tracking-[0.5em] text-muted-foreground">

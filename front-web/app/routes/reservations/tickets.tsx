@@ -102,12 +102,30 @@ export default function TicketsPage() {
         ))}
       </div>
 
-      <div className="sticky bottom-6 mt-10 flex items-center justify-between rounded-app bg-secondary p-6 shadow-2xl border border-border">
-        <div>
-          <p className="text-xs font-bold text-muted-foreground uppercase">合計金額</p>
-          <p className="text-3xl font-black text-foreground">{quoting ? "..." : `${totalPrice.toLocaleString()}円`}</p>
+      <div className="sticky bottom-6 mt-10 w-fit mx-auto flex items-center gap-4 rounded-app bg-secondary px-5 py-3 shadow-2xl border border-border">
+        <div className="flex items-center gap-4">
+          <div className="flex gap-1.5">
+            {Array.from({ length: 6 }).map((_, i) => {
+              const seat = seats[i]
+              return (
+                <div
+                  key={i}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-[9px] font-black ${
+                    seat ? "bg-foreground text-background" : "bg-border/30 text-transparent"
+                  }`}
+                >
+                  {seat ? `${seat.row}-${seat.col}` : ""}
+                </div>
+              )
+            })}
+          </div>
+          <div className="h-8 border-l border-border/50 mx-1" />
+          <div>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">合計金額</p>
+            <p className="text-xl font-black text-foreground leading-none">{quoting ? "..." : `${totalPrice.toLocaleString()}円`}</p>
+          </div>
         </div>
-        <Button size="lg" className="px-10 h-14 text-lg font-black" onClick={handleNext}>
+        <Button size="lg" className="px-10 h-10 text-base font-black" onClick={handleNext}>
           次へ進む
         </Button>
       </div>
