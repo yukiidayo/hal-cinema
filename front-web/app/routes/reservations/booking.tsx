@@ -5,9 +5,12 @@ import { SeatMap } from "~/widgets/SeatMap"
 import { DateSelector } from "~/widgets/DateSelector"
 import { ScheduleGrid } from "~/widgets/ScheduleGrid"
 import { getAuthState } from "~/shared/api/auth"
+import { apiFetch } from "~/shared/api/client"
+import { useReservationFlow } from "~/processes/reservation-flow/context"
 
 export default function BookingPage() {
   const navigate = useNavigate()
+  const { setBookingType, setCustomer } = useReservationFlow()
   const {
     movie, days, selectedDate, setSelectedDate,
     schedules, selectedScheduleId, setSelectedScheduleId,
@@ -19,7 +22,16 @@ export default function BookingPage() {
     const success = await holdSeats()
     if (!success) return
     const auth = await getAuthState()
-    navigate(auth.authenticated ? "/reservations/tickets" : "/reservations/entry")
+    if (auth.authenticated) {
+      setBookingType("member")
+      try {
+        const profile = await apiFetch<{ email: string }>("/members/profile")
+        setCustomer({ email: profile.email })
+      } catch {}
+      navigate("/reservations/tickets")
+    } else {
+      navigate("/reservations/entry")
+    }
   }
 
   if (loading) return <div className="py-20 text-center text-muted-foreground">読み込み中...</div>
