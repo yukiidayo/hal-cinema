@@ -4,23 +4,22 @@ const STEPS = [
   { id: 'booking', label: '座席選択', paths: ['/reservations/booking'] },
   { id: 'customer', label: 'お客様情報', paths: ['/reservations/entry', '/reservations/customer'] },
   { id: 'tickets', label: '券種選択', paths: ['/reservations/tickets'] },
-  { id: 'confirm', label: '予約確認', paths: ['/reservations/confirm'] },
   { id: 'payment', label: 'お支払い', paths: ['/reservations/payment'] },
-  { id: 'complete', label: '完了', paths: ['/reservations/complete'] },
+  { id: 'confirm', label: '確認', paths: ['/reservations/confirm'] },
 ] as const
 
 function CheckIcon({ className }: { className?: string }) {
   return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
     >
       <polyline points="20 6 9 17 4 12" />
@@ -39,12 +38,7 @@ export function ReservationStepBanner() {
     return step.paths.some((p) => pathname === p)
   })
 
-  // Do not show banner on complete step or if path doesn't match
-  if (currentStepIndex === -1 || STEPS[currentStepIndex].id === 'complete') {
-    return null
-  }
-
-  const stepsToShow = STEPS.slice(0, -1) // Exclude 'complete' from the visual steps
+  if (currentStepIndex === -1) return null
 
   return (
     <div className="bg-background border-b border-border py-4">
@@ -52,13 +46,13 @@ export function ReservationStepBanner() {
         {/* Mobile View */}
         <div className="flex flex-col gap-2 md:hidden">
           <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            <span>Step {currentStepIndex + 1} / {stepsToShow.length}</span>
-            <span className="text-primary font-black">{Math.round(((currentStepIndex + 1) / stepsToShow.length) * 100)}%</span>
+            <span>Step {currentStepIndex + 1} / {STEPS.length}</span>
+            <span className="text-primary font-black">{Math.round(((currentStepIndex + 1) / STEPS.length) * 100)}%</span>
           </div>
           <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary transition-all duration-700 ease-in-out" 
-              style={{ width: `${((currentStepIndex + 1) / stepsToShow.length) * 100}%` }}
+            <div
+              className="h-full bg-primary transition-all duration-700 ease-in-out"
+              style={{ width: `${((currentStepIndex + 1) / STEPS.length) * 100}%` }}
             />
           </div>
           <div className="flex items-center gap-2">
@@ -70,23 +64,23 @@ export function ReservationStepBanner() {
         <div className="hidden md:flex items-center justify-between relative max-w-4xl mx-auto px-4">
           {/* Progress Line Background */}
           <div className="absolute top-[15px] left-0 w-full h-0.5 bg-muted z-0" />
-          
+
           {/* Active Progress Line */}
-          <div 
-            className="absolute top-[15px] left-0 h-0.5 bg-primary transition-all duration-700 ease-in-out z-0" 
-            style={{ 
-              width: `${(currentStepIndex / (stepsToShow.length - 1)) * 100}%` 
+          <div
+            className="absolute top-[15px] left-0 h-0.5 bg-primary transition-all duration-700 ease-in-out z-0"
+            style={{
+              width: `${(currentStepIndex / (STEPS.length - 1)) * 100}%`
             }}
           />
-          
-          {stepsToShow.map((step, index) => {
+
+          {STEPS.map((step, index) => {
             const isCompleted = index < currentStepIndex
             const isCurrent = index === currentStepIndex
             const isFuture = index > currentStepIndex
 
             return (
               <div key={step.id} className="relative z-10 flex flex-col items-center gap-3">
-                <div 
+                <div
                   className={`
                     w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500
                     ${isCompleted ? 'bg-primary border-primary text-primary-foreground shadow-md' : ''}
@@ -100,7 +94,7 @@ export function ReservationStepBanner() {
                     <span className="text-xs font-black">{index + 1}</span>
                   )}
                 </div>
-                <span 
+                <span
                   className={`
                     text-[10px] lg:text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all duration-500
                     ${isCompleted ? 'text-muted-foreground' : ''}

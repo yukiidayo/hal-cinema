@@ -10,6 +10,7 @@ import membersRouter from '#modules/members/index.js'
 import authRouter from '#modules/auth/index.js'
 import moviesRouter from '#modules/movies/index.js'
 import reservationsRouter from '#modules/reservations/index.js'
+import screensRouter from '#modules/screens/index.js'
 
 const app = new Hono<AppEnv>()
 
@@ -29,6 +30,7 @@ app.route('/api', membersRouter)
 app.route('/api', authRouter)
 app.route('/api', moviesRouter)
 app.route('/api', reservationsRouter)
+app.route('/api', screensRouter)
 
 app.onError(errorHandler)
 app.get('/health', (c) => c.json({ status: 'ok' }))

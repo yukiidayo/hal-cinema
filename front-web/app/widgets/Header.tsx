@@ -75,6 +75,7 @@ export function Header() {
 
   const NAV_LINKS = [
     { to: "/movies", label: "映画一覧" },
+    { to: "/theater", label: "劇場案内" },
     { to: "/shop", label: "ショップ" },
     { to: "/goods", label: "グッズ" },
     { to: "/cart", label: "カート" },

@@ -14,7 +14,7 @@ export function canProceed(state: ReservationFlowState, to: FlowStep): GuardResu
       if (!state.bookingType) return fail("/reservations/entry", "予約方法を選択してください。")
       return ok()
 
-    case "confirm": {
+    case "payment": {
       const ticketsCheck = canProceed(state, "tickets")
       if (!ticketsCheck.ok) return ticketsCheck
       if (!state.customer?.email) return fail("/reservations/customer", "お客様情報が不足しています。")
@@ -22,8 +22,12 @@ export function canProceed(state: ReservationFlowState, to: FlowStep): GuardResu
       return ok()
     }
 
-    case "payment":
-      return canProceed(state, "confirm")
+    case "confirm": {
+      const paymentCheck = canProceed(state, "payment")
+      if (!paymentCheck.ok) return paymentCheck
+      if (!state.paymentCard) return fail("/reservations/payment", "お支払い情報が不足しています。")
+      return ok()
+    }
   }
 }
 

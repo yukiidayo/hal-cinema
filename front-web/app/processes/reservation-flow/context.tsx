@@ -32,6 +32,7 @@ type ContextValue = {
   setBookingType: (type: "member" | "guest") => void
   setCustomer: (customer: { email: string }) => void
   setTickets: (seats: SelectedSeat[], counts: TicketCounts) => void
+  setPaymentCard: (card: { cardNo: string; expiry: string; cvv: string }) => void
   completeFlow: (result: {
     reservationId: number
     reservationCode: string
@@ -83,6 +84,11 @@ export function ReservationFlowProvider({ children }: { children: ReactNode }) {
     [update],
   )
 
+  const setPaymentCard = useCallback(
+    (card: { cardNo: string; expiry: string; cvv: string }) => update({ paymentCard: card }),
+    [update],
+  )
+
   const completeFlow = useCallback(
     (result: Parameters<ContextValue["completeFlow"]>[0]) => {
       sessionStorage.setItem(COMPLETE_KEY, JSON.stringify(result))
@@ -101,7 +107,7 @@ export function ReservationFlowProvider({ children }: { children: ReactNode }) {
 
   return (
     <ReservationFlowContext.Provider
-      value={{ state, setSeatsAndHold, setBookingType, setCustomer, setTickets, completeFlow, clearFlow, canProceedTo }}
+      value={{ state, setSeatsAndHold, setBookingType, setCustomer, setTickets, setPaymentCard, completeFlow, clearFlow, canProceedTo }}
     >
       {children}
     </ReservationFlowContext.Provider>

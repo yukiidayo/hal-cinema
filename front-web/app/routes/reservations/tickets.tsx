@@ -36,7 +36,7 @@ export default function TicketsPage() {
 
   function handleNext() {
     submit()
-    navigate("/reservations/confirm")
+    navigate("/reservations/payment")
   }
 
   if (loading) {

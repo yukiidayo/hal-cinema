@@ -8,6 +8,10 @@ export default [
     route("/movies", "routes/movies/index.tsx"),
     route("/movies/:movieId", "routes/movies/detail.tsx"),
 
+    // 劇場情報
+    route("/theater", "routes/theater/index.tsx"),
+    route("/theater/:screenId", "routes/theater/screen.tsx"),
+
     // 会員マイページ
     route("/member/reservations", "routes/member/reservations.tsx"),
 
@@ -35,8 +39,8 @@ export default [
     route("/reservations/entry", "routes/reservations/entry.tsx"),
     route("/reservations/customer", "routes/reservations/customer.tsx"),
     route("/reservations/tickets", "routes/reservations/tickets.tsx"),
-    route("/reservations/confirm", "routes/reservations/confirm.tsx"),
     route("/reservations/payment", "routes/reservations/payment.tsx"),
+    route("/reservations/confirm", "routes/reservations/confirm.tsx"),
     route("/reservations/complete", "routes/reservations/complete.tsx"),
   ]),
 ] satisfies RouteConfig;
