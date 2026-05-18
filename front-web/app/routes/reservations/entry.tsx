@@ -27,7 +27,7 @@ export default function EntryPage() {
         <p className="mt-2 text-sm text-muted-foreground">会員の方はログインすると、スムーズに予約いただけます。</p>
       </div>
 
-      <div className="rounded-3xl border border-border bg-card shadow-sm p-8 flex flex-col gap-4">
+      <div className="rounded-app border border-border bg-card shadow-sm p-8 flex flex-col gap-4">
         <Link to="/login?redirect=/reservations/customer">
           <Button size="lg" className="w-full">ログインして予約</Button>
         </Link>

@@ -18,9 +18,16 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-lg: 0.5rem;
-  --radius-md: calc(0.5rem - 2px);
-  --radius-sm: calc(0.5rem - 4px);
+  /* 角丸スケール — --radius を変えると全サイズに反映 */
+  --radius-sm:  calc(var(--radius) - 4px);
+  --radius-md:  calc(var(--radius) - 2px);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 16px);
+
+  /* アプリ共通カード角丸 — rounded-app で使う。ここの値を変えると全て追従する */
+  --radius-app: 0.5rem;
 }
 
 :root {

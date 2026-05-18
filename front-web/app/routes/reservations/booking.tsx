@@ -4,6 +4,7 @@ import { useBooking } from "~/features/reservation/useBooking"
 import { SeatMap } from "~/widgets/SeatMap"
 import { DateSelector } from "~/widgets/DateSelector"
 import { ScheduleGrid } from "~/widgets/ScheduleGrid"
+import { MovieHeroBanner } from "~/widgets/MovieHeroBanner"
 import { getAuthState } from "~/shared/api/auth"
 import { apiFetch } from "~/shared/api/client"
 import { useReservationFlow } from "~/processes/reservation-flow/context"
@@ -46,7 +47,13 @@ export default function BookingPage() {
 
   return (
     <div className="py-6">
-      <h1 className="text-xl font-bold text-foreground">予約：{movie?.title}</h1>
+      {movie && (
+        <MovieHeroBanner
+          title={movie.title}
+          posterUrl={movie.thumbnailUrl}
+          meta={<>{movie.durationMin}分</>}
+        />
+      )}
 
       <div className="mt-6">
         <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">1. 日付を選択</h2>
@@ -89,7 +96,7 @@ export default function BookingPage() {
           )}
 
           {selectedSeatIds.length > 0 && (
-            <div className="sticky bottom-6 mt-10 flex items-center justify-between rounded-2xl bg-secondary p-6 shadow-2xl border border-border">
+            <div className="sticky bottom-6 mt-10 flex items-center justify-between rounded-app bg-secondary p-6 shadow-2xl border border-border">
               <div>
                 <p className="text-xs font-bold text-muted-foreground uppercase">選択中の座席</p>
                 <div className="mt-2 flex flex-wrap gap-2">

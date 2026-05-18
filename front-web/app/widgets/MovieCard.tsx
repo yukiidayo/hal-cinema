@@ -34,7 +34,7 @@ export function MovieGridCard({ movie, selectedDate }: Props) {
         {/* 予約ボタン（ポスターリンクとは独立） */}
         <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Link
-            to={`/movies/${movie.id}?date=${today}`}
+            to={`/reservations/booking/${movie.id}?date=${today}`}
             className="pointer-events-auto w-fit rounded-md bg-primary px-5 py-2 text-center text-sm font-bold text-primary-foreground shadow-xl transition-all duration-300 translate-y-2 group-hover:translate-y-0 hover:scale-110"
           >
             予約
