@@ -39,7 +39,7 @@ export function Layout({children}: { children: React.ReactNode }) {
     return (
         <AuthContext.Provider value={{ auth, setAuth }}>
         <ConfigProvider>
-        <html lang="ja" data-theme={theme}>
+        <html lang="ja" data-theme={theme} suppressHydrationWarning>
         <head>
             <meta charSet="utf-8"/>
             <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>

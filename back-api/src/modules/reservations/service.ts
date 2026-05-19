@@ -1,7 +1,7 @@
 import type mysql from 'mysql2/promise'
 import { pool } from '#db/client.js'
 import { AppError } from '#lib/errors.js'
-import { generateReservationCode, getQrCodeUrl, maskEmail } from '#utils/format.js'
+import { generateReservationCode, getQrCodeUrl, maskEmail, imageUrl } from '#utils/format.js'
 import { RESERVATION_CONFIG, TICKET_PRICES, type TicketType } from '#config/constants.js'
 
 export type SeatLayout = {
@@ -144,7 +144,7 @@ export async function getReservationDetail(code: string) {
     status: r.status as string,
     bookingType: r.booking_type as 'member' | 'guest',
     canCancel,
-    movie: { title: r.movie_title as string, thumbnailUrl: r.thumbnail_url as string | null },
+    movie: { title: r.movie_title as string, thumbnailUrl: imageUrl(r.thumbnail_url as string | null) },
     schedule: { startsAt: r.starts_at, endsAt: r.ends_at, screenName: r.screen_name as string },
     seats: seatRows.map(s => ({
       row: s.row_label as string,
