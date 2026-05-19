@@ -16,10 +16,6 @@ export function useRegister() {
     setError("")
     setLoading(true)
     try {
-      await apiFetch("/members", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      })
       await apiFetch("/auth/otp/send", {
         method: "POST",
         body: JSON.stringify({ email, type: "register" }),
